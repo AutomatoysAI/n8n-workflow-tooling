@@ -1,0 +1,51 @@
+{
+  "brand": {
+    "name": "Aleria Studio",
+    "city": "Amsterdam",
+    "fulfilment_partner": "Nordkey Fulfilment",
+    "as_of": "2026-09-09T08:00:00",
+    "ops_channel": "logistics-morning",
+    "alerts_channel": "ops-alerts",
+    "ops_lead": "Ilse Vermeer"
+  },
+  "_note": "Eleven open orders on the morning of 9 September 2026, chosen so that every lane runs. Three are moving normally and are never mentioned again. Three are stuck - one never left the warehouse, one has had no scan for four days, one has been held by US customs since 2 September. One was invoiced at 2.8x the quoted rate. Two are ambiguous and go to a person rather than into the alarm. Two are orders the courier reported on yesterday and returned nothing at all for today, which is a feed problem, not a parcel problem.",
+  "_dates": "Every date here is fixed rather than relative, and the workflow compares against brand.as_of rather than the clock, so the demo tells the same story whenever it is run. In production that one value becomes $now - see the sticky note on the canvas.",
+
+  "orders": [
+    {"order_number": "AL-10412", "placed_at": "2026-09-06T14:22:00", "customer": "Noor Batelaan", "destination_country": "NL", "zone": "NL Domestic", "weight_kg": 0.6, "quoted_shipping": 5.20, "fulfilled": true, "shipped_at": "2026-09-07T09:00:00", "tracking_number": "3SNL0091", "service_days": 2, "handover_days": 2},
+    {"order_number": "AL-10405", "placed_at": "2026-09-05T10:05:00", "customer": "Jonas Weber", "destination_country": "DE", "zone": "EU Zone 1", "weight_kg": 1.1, "quoted_shipping": 7.40, "fulfilled": true, "shipped_at": "2026-09-06T09:00:00", "tracking_number": "3SDE0088", "service_days": 3, "handover_days": 2},
+    {"order_number": "AL-10388", "placed_at": "2026-09-02T18:40:00", "customer": "Marta Ruiz", "destination_country": "ES", "zone": "EU Zone 2", "weight_kg": 0.9, "quoted_shipping": 8.10, "fulfilled": true, "shipped_at": "2026-09-03T09:00:00", "tracking_number": "3SES0079", "service_days": 4, "handover_days": 2},
+    {"order_number": "AL-10361", "placed_at": "2026-08-29T11:12:00", "customer": "Erin Doyle", "destination_country": "US", "zone": "Intl Zone 3", "weight_kg": 1.4, "quoted_shipping": 24.50, "fulfilled": true, "shipped_at": "2026-08-30T09:00:00", "tracking_number": "92DHL4471", "service_days": 6, "handover_days": 2},
+    {"order_number": "AL-10419", "placed_at": "2026-09-06T20:31:00", "customer": "Priya Shah", "destination_country": "GB", "zone": "UK", "weight_kg": 0.8, "quoted_shipping": 11.20, "fulfilled": true, "shipped_at": "2026-09-07T09:00:00", "tracking_number": "EV6620113", "service_days": 3, "handover_days": 2},
+    {"order_number": "AL-10420", "placed_at": "2026-09-07T08:55:00", "customer": "Camille Roche", "destination_country": "FR", "zone": "EU Zone 1", "weight_kg": 2.2, "quoted_shipping": 9.80, "fulfilled": false, "shipped_at": "", "tracking_number": "", "service_days": 3, "handover_days": 2},
+    {"order_number": "AL-10394", "placed_at": "2026-09-03T09:14:00", "customer": "Luca Ferrari", "destination_country": "IT", "zone": "EU Zone 2", "weight_kg": 1.0, "quoted_shipping": 8.60, "fulfilled": false, "shipped_at": "", "tracking_number": "", "service_days": 4, "handover_days": 2},
+    {"order_number": "AL-10402", "placed_at": "2026-09-04T16:02:00", "customer": "Sofia Lind", "destination_country": "SE", "zone": "EU Zone 2", "weight_kg": 0.7, "quoted_shipping": 8.90, "fulfilled": true, "shipped_at": "2026-09-05T09:00:00", "tracking_number": "3SSE0084", "service_days": 4, "handover_days": 2},
+    {"order_number": "AL-10369", "placed_at": "2026-08-30T22:48:00", "customer": "Tara Nguyen", "destination_country": "AU", "zone": "Intl Zone 4", "weight_kg": 1.6, "quoted_shipping": 29.90, "fulfilled": true, "shipped_at": "2026-08-31T09:00:00", "tracking_number": "92DHL4468", "service_days": 8, "handover_days": 2},
+    {"order_number": "AL-10357", "placed_at": "2026-08-28T13:37:00", "customer": "Michael Brant", "destination_country": "CA", "zone": "Intl Zone 3", "weight_kg": 1.2, "quoted_shipping": 26.40, "fulfilled": true, "shipped_at": "2026-08-29T09:00:00", "tracking_number": "92DHL4465", "service_days": 6, "handover_days": 2},
+    {"order_number": "AL-10381", "placed_at": "2026-09-01T07:19:00", "customer": "Alicia Moreno", "destination_country": "US", "zone": "Intl Zone 3", "weight_kg": 0.9, "quoted_shipping": 22.80, "fulfilled": true, "shipped_at": "2026-09-02T09:00:00", "tracking_number": "92DHL4469", "service_days": 6, "handover_days": 2}
+  ],
+
+  "tracking": [
+    {"order_number": "AL-10412", "carrier": "PostNL", "scan_at": "2026-09-09T06:12:00", "scan_status": "Out for delivery", "scan_location": "Amsterdam", "invoiced_shipping": 5.20},
+    {"order_number": "AL-10405", "carrier": "PostNL", "scan_at": "2026-09-08T19:40:00", "scan_status": "In transit", "scan_location": "Duisburg", "invoiced_shipping": 7.40},
+    {"order_number": "AL-10388", "carrier": "Correos", "scan_at": "2026-09-04T11:05:00", "scan_status": "Arrived at sorting hub", "scan_location": "Madrid", "invoiced_shipping": 8.10},
+    {"order_number": "AL-10361", "carrier": "DHL Express", "scan_at": "2026-09-02T14:20:00", "scan_status": "Held by customs - commercial invoice required", "scan_location": "New York JFK", "invoiced_shipping": 24.50},
+    {"order_number": "AL-10419", "carrier": "Evri", "scan_at": "2026-09-08T08:30:00", "scan_status": "In transit", "scan_location": "Warrington", "invoiced_shipping": 31.80},
+    {"order_number": "AL-10402", "carrier": "PostNord", "scan_at": "2026-09-06T16:55:00", "scan_status": "In transit", "scan_location": "Malmo", "invoiced_shipping": 8.90},
+    {"order_number": "AL-10369", "carrier": "DHL Express", "scan_at": "2026-09-06T02:15:00", "scan_status": "Departed origin country", "scan_location": "Singapore", "invoiced_shipping": 29.90}
+  ],
+
+  "snapshot": [
+    {"order_number": "AL-10412", "snap_scan_at": "2026-09-07T09:10:00", "snap_lane": "Moving normally", "snap_mornings_reported": 0},
+    {"order_number": "AL-10405", "snap_scan_at": "2026-09-07T05:30:00", "snap_lane": "Moving normally", "snap_mornings_reported": 0},
+    {"order_number": "AL-10388", "snap_scan_at": "2026-09-04T11:05:00", "snap_lane": "Stuck", "snap_mornings_reported": 2},
+    {"order_number": "AL-10361", "snap_scan_at": "2026-09-02T14:20:00", "snap_lane": "Stuck", "snap_mornings_reported": 4},
+    {"order_number": "AL-10419", "snap_scan_at": "2026-09-07T20:15:00", "snap_lane": "Moving normally", "snap_mornings_reported": 0},
+    {"order_number": "AL-10420", "snap_scan_at": "", "snap_lane": "Moving normally", "snap_mornings_reported": 0},
+    {"order_number": "AL-10394", "snap_scan_at": "", "snap_lane": "Stuck", "snap_mornings_reported": 1},
+    {"order_number": "AL-10402", "snap_scan_at": "2026-09-06T16:55:00", "snap_lane": "Not sure", "snap_mornings_reported": 1},
+    {"order_number": "AL-10369", "snap_scan_at": "2026-09-06T02:15:00", "snap_lane": "Not sure", "snap_mornings_reported": 0},
+    {"order_number": "AL-10357", "snap_scan_at": "2026-09-06T08:00:00", "snap_lane": "Not sure", "snap_mornings_reported": 1},
+    {"order_number": "AL-10381", "snap_scan_at": "2026-09-06T11:20:00", "snap_lane": "Moving normally", "snap_mornings_reported": 0}
+  ]
+}

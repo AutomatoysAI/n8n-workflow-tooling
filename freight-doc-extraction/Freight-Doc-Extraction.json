@@ -1,0 +1,540 @@
+{
+  "name": "Freight Doc Extraction",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nFive documents off the load desk inbox, already turned into text. Each one is\nread, and then **checked before anything is believed**.\n\n**Two file themselves. Three stop**, each for a different reason: one adds up\nwrong, one is missing fields the scanner cut off, and one is a proof of delivery\nthat turned up where a rate confirmation was expected.\n\nEvery document is logged either way, filed or held. A document that vanishes\nquietly is the failure this whole design is built against.",
+        "height": 320,
+        "width": 440,
+        "color": 4
+      },
+      "id": "d5000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1980,
+        -600
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The model will always give you an answer\n\nThis is the thing to say first on the call, because it is the failure everybody\nelse's version has.\n\nAsk a language model for a broker's MC number and it will return something\nMC-number-shaped **even when the document does not contain one**. It is not\nlying; it is doing what it was asked. A confident wrong number that flows\nstraight into dispatch is far worse than a blank one, because nobody goes\nlooking for it.\n\n**So every value has to come back with the exact words it was read from.** If\nthe model cannot quote the document, it did not read it there - and the value is\ntreated as invented no matter how plausible it looks.\n\n**Then the document is made to check itself.** Linehaul plus fuel plus\naccessorials has to equal the total the document prints. One of the five has a\ntransposed digit - the charges come to **$3,797.50** and the document says\n**$3,779.50**. Every field on it looks perfectly reasonable. Only the arithmetic\ncatches it, and a person skimming forty of these on a Monday would not.\n\n**None of that judgement is the model's.** It reads; a Set node and an IF\ndecide. That ordering is the design.",
+        "height": 500,
+        "width": 520,
+        "color": 3
+      },
+      "id": "d5000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1510,
+        -600
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Three practical notes\n\n**Everything that writes is greyed out** - filing the load, the review ping, and\nthe log. It runs end to end and leaves nothing behind.\n\n**The reader on the left is the swap point.** Documents arrive by email here.\nDropbox, Drive, an SFTP folder or a portal download is one different node in\nfront, and nothing to the right of it changes.\n\n**Text quality is the real-world variable, not the prompt.** A clean PDF carries\nits text inside it and Extract from File just reads it. A photographed or faxed\npage carries nothing and needs OCR first, and OCR is where accuracy is actually\nwon or lost. Worth pricing separately, and worth asking for a sample of the\n*worst* document a client has before quoting anything.",
+        "height": 400,
+        "width": 460,
+        "color": 6
+      },
+      "id": "d5000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -950,
+        -600
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d5000000-0000-4000-8000-000000000004",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1960,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "attachment_0",
+        "options": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000005",
+      "name": "Read the PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1740,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0,
+          "maxTokens": 1200
+        }
+      },
+      "id": "d5000000-0000-4000-8000-000000000006",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Rate confirmation",
+              "description": "A broker's offer of a specific load to a carrier. Names a load number, a pickup and a delivery, and a rate the carrier is being paid. Sometimes headed Rate Confirmation, Load Confirmation or Carrier Confirmation."
+            },
+            {
+              "category": "Proof of delivery",
+              "description": "Evidence a load already arrived - a signed bill of lading, a delivery receipt, a POD. Names who received it and when, and carries no rate."
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other"
+        }
+      },
+      "id": "d5000000-0000-4000-8000-000000000007",
+      "name": "What Kind of Document?",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=Read this rate confirmation and return the fields below.\n\n**Every field has two parts: the value, and `quote` - the exact run of text you read it\nfrom, copied character for character out of the document.**\n\n- If a field is not in the document, return an empty value AND an empty quote. An empty\n  field is a correct answer and costs nothing. A field you filled in from what usually\n  appears on documents like this costs a dispatcher a phone call, or worse, does not.\n- Never tidy, correct, complete or reformat a quote. It has to be findable in the text\n  with a search box.\n- Money: digits and a decimal point only. 1,640.00 becomes 1640.00. No currency symbol.\n- Dates: YYYY-MM-DD. These documents are US-format, so 09/04/2026 is 4 September 2026.\n  If a date is blank or cut off, leave it empty - do not infer it from the other date.\n- accessorials is every extra charge added together - lumper, detention, tarp, layover.\n  If there are none, return 0.00 and quote the line that says so.\n- Do not compute anything. If the charges do not add up to the total, return both exactly\n  as printed. Something downstream is looking for precisely that.\n\nDOCUMENT:\n{{ $json.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"load_number\": {\n    \"value\": \"MFB-88214\",\n    \"quote\": \"RATE CONFIRMATION - LOAD MFB-88214\"\n  },\n  \"broker_name\": {\n    \"value\": \"Meridian Freight Brokers Inc\",\n    \"quote\": \"MERIDIAN FREIGHT BROKERS INC\"\n  },\n  \"broker_mc\": {\n    \"value\": \"812445\",\n    \"quote\": \"MC# 812445\"\n  },\n  \"pickup_date\": {\n    \"value\": \"2026-09-03\",\n    \"quote\": \"DATE: 09/03/2026  0800-1400\"\n  },\n  \"delivery_date\": {\n    \"value\": \"2026-09-04\",\n    \"quote\": \"DATE: 09/04/2026  0700-1200\"\n  },\n  \"linehaul\": {\n    \"value\": \"2450.00\",\n    \"quote\": \"Linehaul .................. 2,450.00\"\n  },\n  \"fuel_surcharge\": {\n    \"value\": \"385.00\",\n    \"quote\": \"Fuel Surcharge ............   385.00\"\n  },\n  \"accessorials\": {\n    \"value\": \"0.00\",\n    \"quote\": \"Accessorials ..............     0.00\"\n  },\n  \"total_rate\": {\n    \"value\": \"2835.00\",\n    \"quote\": \"TOTAL RATE ................ 2,835.00 USD\"\n  }\n}",
+        "options": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000008",
+      "name": "Pull Out the Fields",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "load_number",
+              "type": "string",
+              "value": "={{ ($json.output.load_number || {}).value }}"
+            },
+            {
+              "id": "a2",
+              "name": "broker_name",
+              "type": "string",
+              "value": "={{ ($json.output.broker_name || {}).value }}"
+            },
+            {
+              "id": "a3",
+              "name": "broker_mc",
+              "type": "string",
+              "value": "={{ ($json.output.broker_mc || {}).value }}"
+            },
+            {
+              "id": "a4",
+              "name": "pickup_date",
+              "type": "string",
+              "value": "={{ ($json.output.pickup_date || {}).value }}"
+            },
+            {
+              "id": "a5",
+              "name": "delivery_date",
+              "type": "string",
+              "value": "={{ ($json.output.delivery_date || {}).value }}"
+            },
+            {
+              "id": "a6",
+              "name": "total_rate",
+              "type": "number",
+              "value": "={{ Number(String(($json.output.total_rate || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) }}"
+            },
+            {
+              "id": "a7",
+              "name": "charges_add_up_to",
+              "type": "number",
+              "value": "={{ Math.round((Number(String(($json.output.linehaul || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.fuel_surcharge || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.accessorials || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) * 100) / 100 }}"
+            },
+            {
+              "id": "a8",
+              "name": "missing_fields",
+              "type": "string",
+              "value": "={{ [['Load number', ($json.output.load_number || {}).value, ($json.output.load_number || {}).quote], ['Broker', ($json.output.broker_name || {}).value, ($json.output.broker_name || {}).quote], ['Broker MC number', ($json.output.broker_mc || {}).value, ($json.output.broker_mc || {}).quote], ['Pickup date', ($json.output.pickup_date || {}).value, ($json.output.pickup_date || {}).quote], ['Delivery date', ($json.output.delivery_date || {}).value, ($json.output.delivery_date || {}).quote], ['Total rate', ($json.output.total_rate || {}).value, ($json.output.total_rate || {}).quote]].filter(x => !x[1] || String(x[1]).trim() === '').map(x => x[0]).join(', ') }}"
+            },
+            {
+              "id": "a9",
+              "name": "unquoted_fields",
+              "type": "string",
+              "value": "={{ [['Load number', ($json.output.load_number || {}).value, ($json.output.load_number || {}).quote], ['Broker', ($json.output.broker_name || {}).value, ($json.output.broker_name || {}).quote], ['Broker MC number', ($json.output.broker_mc || {}).value, ($json.output.broker_mc || {}).quote], ['Pickup date', ($json.output.pickup_date || {}).value, ($json.output.pickup_date || {}).quote], ['Delivery date', ($json.output.delivery_date || {}).value, ($json.output.delivery_date || {}).quote], ['Total rate', ($json.output.total_rate || {}).value, ($json.output.total_rate || {}).quote]].filter(x => x[1] && String(x[1]).trim() !== '' && (!x[2] || String(x[2]).trim() === '')).map(x => x[0]).join(', ') }}"
+            },
+            {
+              "id": "a10",
+              "name": "money_gap",
+              "type": "number",
+              "value": "={{ Math.round(Math.abs((Number(String(($json.output.linehaul || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.fuel_surcharge || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.accessorials || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) - Number(String(($json.output.total_rate || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) * 100) / 100 }}"
+            },
+            {
+              "id": "a11",
+              "name": "review_reason",
+              "type": "string",
+              "value": "={{ ([['Load number', ($json.output.load_number || {}).value, ($json.output.load_number || {}).quote], ['Broker', ($json.output.broker_name || {}).value, ($json.output.broker_name || {}).quote], ['Broker MC number', ($json.output.broker_mc || {}).value, ($json.output.broker_mc || {}).quote], ['Pickup date', ($json.output.pickup_date || {}).value, ($json.output.pickup_date || {}).quote], ['Delivery date', ($json.output.delivery_date || {}).value, ($json.output.delivery_date || {}).quote], ['Total rate', ($json.output.total_rate || {}).value, ($json.output.total_rate || {}).quote]].filter(x => !x[1] || String(x[1]).trim() === '').map(x => x[0]).join(', ')) ? ('Missing: ' + ([['Load number', ($json.output.load_number || {}).value, ($json.output.load_number || {}).quote], ['Broker', ($json.output.broker_name || {}).value, ($json.output.broker_name || {}).quote], ['Broker MC number', ($json.output.broker_mc || {}).value, ($json.output.broker_mc || {}).quote], ['Pickup date', ($json.output.pickup_date || {}).value, ($json.output.pickup_date || {}).quote], ['Delivery date', ($json.output.delivery_date || {}).value, ($json.output.delivery_date || {}).quote], ['Total rate', ($json.output.total_rate || {}).value, ($json.output.total_rate || {}).quote]].filter(x => !x[1] || String(x[1]).trim() === '').map(x => x[0]).join(', ')) + '.') : (([['Load number', ($json.output.load_number || {}).value, ($json.output.load_number || {}).quote], ['Broker', ($json.output.broker_name || {}).value, ($json.output.broker_name || {}).quote], ['Broker MC number', ($json.output.broker_mc || {}).value, ($json.output.broker_mc || {}).quote], ['Pickup date', ($json.output.pickup_date || {}).value, ($json.output.pickup_date || {}).quote], ['Delivery date', ($json.output.delivery_date || {}).value, ($json.output.delivery_date || {}).quote], ['Total rate', ($json.output.total_rate || {}).value, ($json.output.total_rate || {}).quote]].filter(x => x[1] && String(x[1]).trim() !== '' && (!x[2] || String(x[2]).trim() === '')).map(x => x[0]).join(', ')) ? ('Not quoted from the document, so not trusted: ' + ([['Load number', ($json.output.load_number || {}).value, ($json.output.load_number || {}).quote], ['Broker', ($json.output.broker_name || {}).value, ($json.output.broker_name || {}).quote], ['Broker MC number', ($json.output.broker_mc || {}).value, ($json.output.broker_mc || {}).quote], ['Pickup date', ($json.output.pickup_date || {}).value, ($json.output.pickup_date || {}).quote], ['Delivery date', ($json.output.delivery_date || {}).value, ($json.output.delivery_date || {}).quote], ['Total rate', ($json.output.total_rate || {}).value, ($json.output.total_rate || {}).quote]].filter(x => x[1] && String(x[1]).trim() !== '' && (!x[2] || String(x[2]).trim() === '')).map(x => x[0]).join(', ')) + '.') : ((Math.round(Math.abs((Number(String(($json.output.linehaul || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.fuel_surcharge || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.accessorials || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) - Number(String(($json.output.total_rate || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) * 100) / 100 > 0.01) ? ('The charges add to $' + (Math.round((Number(String(($json.output.linehaul || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.fuel_surcharge || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.accessorials || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' but the document says $' + (Number(String(($json.output.total_rate || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' - a $' + (Math.round(Math.abs((Number(String(($json.output.linehaul || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.fuel_surcharge || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0) + Number(String(($json.output.accessorials || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) - Number(String(($json.output.total_rate || {}).value || 0).replace(/[^0-9.\\-]/g, '') || 0)) * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' difference.') : '')) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000009",
+      "name": "Check the Extraction",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1040,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "s1",
+              "leftValue": "={{ $json.review_reason }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000010",
+      "name": "Safe to File?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Loads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Load": "={{ $json.load_number }}",
+            "Broker": "={{ $json.broker_name }}",
+            "Broker MC": "={{ $json.broker_mc }}",
+            "Pickup": "={{ $json.pickup_date }}",
+            "Delivery": "={{ $json.delivery_date }}",
+            "Rate": "={{ $json.total_rate }}",
+            "Filed": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000011",
+      "name": "File the Load",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -560,
+        -20
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "load-desk",
+          "mode": "name"
+        },
+        "text": "=*Needs a person* - {{ $('Read the PDF Text').item.json.filename }}\n{{ $json.review_reason || 'Not a rate confirmation.' }}\n{{ $json.load_number ? ('Load ' + $json.load_number + ', ' + $json.broker_name) : 'From ' + $('Read the PDF Text').item.json.from }}\n_Nothing has been filed._",
+        "otherOptions": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000012",
+      "name": "Send It for Review",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -560,
+        260
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Documents Seen",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "File": "={{ $('Read the PDF Text').item.json.filename }}",
+            "Received": "={{ $('Read the PDF Text').item.json.received_at }}",
+            "From": "={{ $('Read the PDF Text').item.json.from }}",
+            "Outcome": "={{ $json.review_reason === '' ? 'Filed' : 'Held' }}",
+            "Reason": "={{ $json.review_reason || 'Not a rate confirmation.' }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "d5000000-0000-4000-8000-000000000013",
+      "name": "Log Every Document",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -320,
+        120
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Read the PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the PDF Text": {
+      "main": [
+        [
+          {
+            "node": "What Kind of Document?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Kind of Document?": {
+      "main": [
+        [
+          {
+            "node": "Pull Out the Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send It for Review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send It for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "What Kind of Document?",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Pull Out the Fields",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Out the Fields": {
+      "main": [
+        [
+          {
+            "node": "Check the Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check the Extraction": {
+      "main": [
+        [
+          {
+            "node": "Safe to File?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Safe to File?": {
+      "main": [
+        [
+          {
+            "node": "File the Load",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send It for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File the Load": {
+      "main": [
+        [
+          {
+            "node": "Log Every Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send It for Review": {
+      "main": [
+        [
+          {
+            "node": "Log Every Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Read the PDF Text": [
+      {
+        "json": {
+          "id": "DOC-1",
+          "filename": "meridian_rc_88214.pdf",
+          "received_at": "2026-09-01T08:14:00",
+          "from": "dispatch@meridianfreight.example",
+          "text": "MERIDIAN FREIGHT BROKERS INC\nMC# 812445   DOT# 2299871\n\nRATE CONFIRMATION - LOAD MFB-88214\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Joliet, IL 60432        DATE: 09/03/2026  0800-1400\nDELIVERY: Columbus, OH 43219      DATE: 09/04/2026  0700-1200\n\nEQUIPMENT: 53' Dry Van        WEIGHT: 38,400 lbs\nCOMMODITY: Packaged consumer goods\n\nCHARGES\n  Linehaul .................. 2,450.00\n  Fuel Surcharge ............   385.00\n  Accessorials ..............     0.00\n  ----------------------------------------\n  TOTAL RATE ................ 2,835.00 USD\n\nPAYMENT TERMS: Net 30 from receipt of signed POD.\nDetention billable after 2 hours, $50/hr, requires in/out times."
+        }
+      },
+      {
+        "json": {
+          "id": "DOC-2",
+          "filename": "crosscontinental_rc_40917.pdf",
+          "received_at": "2026-09-01T09:02:00",
+          "from": "loads@crosscontinental.example",
+          "text": "CROSS CONTINENTAL LOGISTICS LLC\nMC# 651902\n\nRATE CONFIRMATION - LOAD CCL-40917\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Laredo, TX 78045         DATE: 09/04/2026  0600-1000\nDELIVERY: Atlanta, GA 30336        DATE: 09/06/2026  0800-1500\n\nEQUIPMENT: 53' Reefer  -  set 34F continuous\nWEIGHT: 41,900 lbs     COMMODITY: Produce\n\nCHARGES\n  Linehaul .................. 3,150.00\n  Fuel Surcharge ............   472.50\n  Lumper (receipt required) .   175.00\n  ----------------------------------------\n  TOTAL RATE ................ 3,779.50 USD\n\nPAYMENT TERMS: Net 21. Quick pay 2% available.\nTemperature records required with invoice."
+        }
+      },
+      {
+        "json": {
+          "id": "DOC-3",
+          "filename": "redline_rc_2291_scan.pdf",
+          "received_at": "2026-09-01T11:47:00",
+          "from": "ops@redlinetransport.example",
+          "text": "REDLINE TRANSPORT SOLUTIONS\n\nRATE CONFIRMATION - LOAD RTS-2291\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Fort Worth, TX 76106      DATE: 09/05/2026  1000-1600\nDELIVERY: Memphis, TN 38118        DATE:\n\nEQUIPMENT: 53' Dry Van        WEIGHT: 29,750 lbs\n\nCHARGES\n  Linehaul .................. 1,640.00\n  Fuel Surcharge ............   246.00\n  Accessorials ..............     0.00\n  ----------------------------------------\n  TOTAL RATE ................ 1,886.00 USD\n\nPAYMENT TERMS: Net 30.\n\n[remainder of page not captured - scan truncated]"
+        }
+      },
+      {
+        "json": {
+          "id": "DOC-4",
+          "filename": "pod_signed_88190.pdf",
+          "received_at": "2026-09-01T15:20:00",
+          "from": "driver.chidi@kestrelline.example",
+          "text": "PROOF OF DELIVERY / SIGNED BILL OF LADING\n\nBOL# 4471902        LOAD MFB-88190\nCONSIGNEE: Wexford Distribution, Columbus OH\n\nDELIVERED: 08/31/2026 at 10:42\nPIECES: 22 pallets        WEIGHT: 37,100 lbs\n\nCONDITION: Received in good order, no exceptions noted.\nRECEIVED BY: D. Okonkwo (print)   Signature on file\nDRIVER: C. Adeyemi\n\nNo detention. Trailer sealed on arrival, seal 88231 intact."
+        }
+      },
+      {
+        "json": {
+          "id": "DOC-5",
+          "filename": "anchorpoint_rc_7734.pdf",
+          "received_at": "2026-09-01T16:05:00",
+          "from": "brokerage@anchorpointlogistics.example",
+          "text": "ANCHOR POINT LOGISTICS\nMC# 447120   DOT# 1885430\n\nRATE CONFIRMATION - LOAD APL-7734\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Kansas City, MO 64120     DATE: 09/07/2026  0900-1500\nDELIVERY: Denver, CO 80216         DATE: 09/08/2026  0800-1400\n\nEQUIPMENT: 53' Dry Van        WEIGHT: 24,300 lbs\nCOMMODITY: Paper products\n\nCHARGES\n  Linehaul .................. 1,875.00\n  Fuel Surcharge ............   281.25\n  Accessorials ..............     0.00\n  ----------------------------------------\n  TOTAL RATE ................ 2,156.25 USD\n\nPAYMENT TERMS: Net 30 from signed POD."
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

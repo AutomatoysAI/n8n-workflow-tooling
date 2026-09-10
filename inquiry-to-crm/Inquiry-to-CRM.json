@@ -1,0 +1,1116 @@
+{
+  "name": "Inquiry to CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nSupport email and website form submissions arrive through **different front\ndoors** and are turned into one shape immediately. From there a single matching\nengine decides who each one is from.\n\nSix inquiries in: two matched with confidence, two matched but **not trusted\nenough to file automatically**, two genuinely new.\n\nEvery one of them gets a task, whichever way it went. Nothing is dropped -\nwhich is the actual goal.",
+        "height": 320,
+        "width": 460,
+        "color": 4
+      },
+      "id": "e7000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1980,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## A wrong match is worse than no match\n\nFile Jane's ticket against Daniel's record and you have put one customer's\norder history on another customer's file. Support then answers Jane using\nDaniel's orders.\n\nSo the system has **three** answers, not two:\n\n- **email or order number** matched - file it\n- **phone number only**, or a shared mailbox - a person confirms first\n- **nothing matched** - create a lead marked unverified\n\nThe middle lane is the whole design. Match too strictly and the CRM fills with\nduplicates within a quarter. Match too loosely and you merge two real people.\nLiving between those two failures is the job.",
+        "height": 360,
+        "width": 500,
+        "color": 3
+      },
+      "id": "e7000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1480,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Why four nodes are greyed out\n\nEverything that writes - to the CRM, to the task list, to Slack - is\n**disabled on purpose**. You can run the whole thing against a real inbox,\nread every verdict, and leave nothing behind.\n\nThe two sources and the customer lookup have **pinned data**, so it runs with\nno accounts connected at all.\n\n**Note there is no AI here.** Identity matching is arithmetic, and arithmetic\nshould be deterministic - the same inquiry has to reach the same customer\nevery time. The AI belongs one step later, drafting the reply.",
+        "height": 320,
+        "width": 460,
+        "color": 6
+      },
+      "id": "e7000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e7000000-0000-4000-8000-000000000004",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1960,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "q": "to:support@cedarline.example is:unread"
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000005",
+      "name": "Support Inbox",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1760,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Form Responses",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000006",
+      "name": "Website Support Form",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1760,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "inquiry_id",
+              "type": "string",
+              "value": "={{ $json.inquiry_id }}"
+            },
+            {
+              "id": "a2",
+              "name": "source",
+              "type": "string",
+              "value": "Support email"
+            },
+            {
+              "id": "a3",
+              "name": "received_at",
+              "type": "string",
+              "value": "={{ $json.date }}"
+            },
+            {
+              "id": "a4",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "id": "a5",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "id": "a6",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "id": "a7",
+              "name": "order_number",
+              "type": "string",
+              "value": "={{ $json.order_number }}"
+            },
+            {
+              "id": "a8",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "id": "a9",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000007",
+      "name": "Read the Email as an Inquiry",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1540,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "inquiry_id",
+              "type": "string",
+              "value": "={{ $json.inquiry_id }}"
+            },
+            {
+              "id": "a2",
+              "name": "source",
+              "type": "string",
+              "value": "Website form"
+            },
+            {
+              "id": "a3",
+              "name": "received_at",
+              "type": "string",
+              "value": "={{ $json.submitted_at }}"
+            },
+            {
+              "id": "a4",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $json.full_name }}"
+            },
+            {
+              "id": "a5",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.email_address }}"
+            },
+            {
+              "id": "a6",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $json.phone_number }}"
+            },
+            {
+              "id": "a7",
+              "name": "order_number",
+              "type": "string",
+              "value": "={{ $json.order_reference }}"
+            },
+            {
+              "id": "a8",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ $json.topic }}"
+            },
+            {
+              "id": "a9",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.enquiry }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000008",
+      "name": "Read the Form as an Inquiry",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1540,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "phone_key",
+              "type": "string",
+              "value": "={{ ($json.phone || '').replace(/\\D/g, '').slice(-10) }}"
+            },
+            {
+              "id": "a2",
+              "name": "key",
+              "type": "string",
+              "value": "={{ ($json.order_number || '').trim().toUpperCase() || ($json.email || '').trim().toLowerCase() }}"
+            },
+            {
+              "id": "a3",
+              "name": "matched_on",
+              "type": "string",
+              "value": "={{ ($json.order_number || '').trim().toUpperCase() ? 'order number' : (($json.email || '').trim().toLowerCase() ? 'email address' : 'nothing usable') }}"
+            },
+            {
+              "id": "a4",
+              "name": "is_role_address",
+              "type": "boolean",
+              "value": "={{ [\"info\", \"support\", \"orders\", \"sales\", \"admin\", \"contact\", \"hello\", \"billing\", \"help\", \"enquiries\", \"accounts\", \"office\"].includes(($json.email || '').trim().toLowerCase().split('@')[0]) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000009",
+      "name": "Clean Up the Identifiers",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Customer Identifiers",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000010",
+      "name": "Customer Lookup (CRM)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1320,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "key",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000011",
+      "name": "Look Up the Strong Identifiers",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f1",
+              "leftValue": "={{ $json.customer_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000012",
+      "name": "Did We Find Them?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -880,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "key",
+              "type": "string",
+              "value": "={{ $json.phone_key }}"
+            },
+            {
+              "id": "a2",
+              "name": "matched_on",
+              "type": "string",
+              "value": "={{ $json.phone_key ? 'phone number' : 'nothing usable' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000013",
+      "name": "Fall Back to the Phone Number",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "key",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000014",
+      "name": "Look Up the Phone Number",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c1",
+                    "leftValue": "={{ $json.customer_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  },
+                  {
+                    "id": "c2",
+                    "leftValue": "={{ $json.is_role_address }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  },
+                  {
+                    "id": "c3",
+                    "leftValue": "={{ $json.matched_on }}",
+                    "rightValue": "phone number",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sure enough to file it"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c4",
+                    "leftValue": "={{ $json.customer_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Matched, but not sure enough"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Nobody we know - new lead"
+        }
+      },
+      "id": "e7000000-0000-4000-8000-000000000015",
+      "name": "How Sure Are We?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Customer Activity",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer": "={{ $json.customer_id }} - {{ $json.customer_name }}",
+            "Inquiry": "={{ $json.inquiry_id }}",
+            "Received": "={{ $json.received_at }}",
+            "Source": "={{ $json.source }}",
+            "Matched On": "={{ $json.matched_on }}",
+            "Subject": "={{ $json.subject }}",
+            "Message": "={{ $json.message }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000016",
+      "name": "Attach It to the Customer Record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        60,
+        -140
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "support-triage",
+          "mode": "name"
+        },
+        "text": "=*Is this the same person?* {{ $json.inquiry_id }} ({{ $json.source }})\nCame from *{{ $json.email || $json.phone }}*, matched to *{{ $json.customer_name }}* on {{ $json.matched_on }}.\n{{ $json.is_role_address ? '_Shared mailbox - could be anyone at that company._' : '_Phone number only - not proof on its own._' }}\n> {{ $json.subject }}",
+        "otherOptions": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000017",
+      "name": "A Person Confirms the Match",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        60,
+        100
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "New Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Phone": "={{ $json.phone }}",
+            "Source": "={{ $json.source }}",
+            "First Contact": "={{ $json.received_at }}",
+            "Message": "={{ $json.message }}",
+            "Status": "Unverified - needs review"
+          }
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000018",
+      "name": "Create a Lead for Review",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        60,
+        340
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "task_status",
+              "type": "string",
+              "value": "New"
+            },
+            {
+              "id": "a2",
+              "name": "priority",
+              "type": "string",
+              "value": "={{ ($('How Sure Are We?').item.json.order_number || /damag|urgent|broken|wrong|missing|late/i.test($('How Sure Are We?').item.json.message)) ? 'High' : 'Normal' }}"
+            },
+            {
+              "id": "a3",
+              "name": "due_date",
+              "type": "string",
+              "value": "={{ DateTime.fromISO($('How Sure Are We?').item.json.received_at).plus({ days: ($('How Sure Are We?').item.json.order_number || /damag|urgent|broken|wrong|missing|late/i.test($('How Sure Are We?').item.json.message)) ? 1 : 3 }).toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "id": "a4",
+              "name": "assigned_to",
+              "type": "string",
+              "value": "={{ $('How Sure Are We?').item.json.order_number ? 'Nadia Cortez - Orders' : 'Theo Mbeki - Support' }}"
+            },
+            {
+              "id": "a5",
+              "name": "internal_note",
+              "type": "string",
+              "value": "={{ $('How Sure Are We?').item.json.customer_id ? ('Matched to ' + $('How Sure Are We?').item.json.customer_name + ' on ' + $('How Sure Are We?').item.json.matched_on + '.' + ($('How Sure Are We?').item.json.matched_on === 'phone number' ? ' A phone number is not proof of identity - confirm before relying on the history.' : '') + ($('How Sure Are We?').item.json.is_role_address ? ' Shared mailbox - confirm which person this is.' : '')) : 'No matching customer on file. Lead created for review, and the order number given did not resolve.' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000019",
+      "name": "Build the Task",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Tasks",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Inquiry": "={{ $('How Sure Are We?').item.json.inquiry_id }}",
+            "Received": "={{ $('How Sure Are We?').item.json.received_at }}",
+            "Source": "={{ $('How Sure Are We?').item.json.source }}",
+            "Customer": "={{ $('How Sure Are We?').item.json.customer_id ? $('How Sure Are We?').item.json.customer_id + ' - ' + $('How Sure Are We?').item.json.customer_name : 'Not identified' }}",
+            "Contact Email": "={{ $('How Sure Are We?').item.json.email }}",
+            "Contact Phone": "={{ $('How Sure Are We?').item.json.phone }}",
+            "Order": "={{ $('How Sure Are We?').item.json.order_number }}",
+            "Subject": "={{ $('How Sure Are We?').item.json.subject }}",
+            "Message": "={{ $('How Sure Are We?').item.json.message }}",
+            "Status": "={{ $json.task_status }}",
+            "Priority": "={{ $json.priority }}",
+            "Due": "={{ $json.due_date }}",
+            "Assigned To": "={{ $json.assigned_to }}",
+            "Internal Note": "={{ $json.internal_note }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e7000000-0000-4000-8000-000000000020",
+      "name": "Create the Task",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        540,
+        100
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Support Inbox",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Website Support Form",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Customer Lookup (CRM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Inbox": {
+      "main": [
+        [
+          {
+            "node": "Read the Email as an Inquiry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Support Form": {
+      "main": [
+        [
+          {
+            "node": "Read the Form as an Inquiry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the Email as an Inquiry": {
+      "main": [
+        [
+          {
+            "node": "Clean Up the Identifiers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the Form as an Inquiry": {
+      "main": [
+        [
+          {
+            "node": "Clean Up the Identifiers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Up the Identifiers": {
+      "main": [
+        [
+          {
+            "node": "Look Up the Strong Identifiers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Lookup (CRM)": {
+      "main": [
+        [
+          {
+            "node": "Look Up the Strong Identifiers",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Look Up the Phone Number",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Look Up the Strong Identifiers": {
+      "main": [
+        [
+          {
+            "node": "Did We Find Them?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Did We Find Them?": {
+      "main": [
+        [
+          {
+            "node": "How Sure Are We?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fall Back to the Phone Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fall Back to the Phone Number": {
+      "main": [
+        [
+          {
+            "node": "Look Up the Phone Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up the Phone Number": {
+      "main": [
+        [
+          {
+            "node": "How Sure Are We?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "How Sure Are We?": {
+      "main": [
+        [
+          {
+            "node": "Attach It to the Customer Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "A Person Confirms the Match",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a Lead for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach It to the Customer Record": {
+      "main": [
+        [
+          {
+            "node": "Build the Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A Person Confirms the Match": {
+      "main": [
+        [
+          {
+            "node": "Build the Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a Lead for Review": {
+      "main": [
+        [
+          {
+            "node": "Build the Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build the Task": {
+      "main": [
+        [
+          {
+            "node": "Create the Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Support Inbox": [
+      {
+        "json": {
+          "inquiry_id": "INQ-01",
+          "id": "18f2a1",
+          "date": "2026-09-01T08:12:00",
+          "from": "marisol@vegaflooring.example",
+          "name": "Marisol Vega",
+          "phone": "",
+          "order_number": "ORD-88410",
+          "subject": "Order arrived damaged",
+          "text": "Two of the four boxes in order ORD-88410 arrived with the corners crushed and the boards inside are chipped. I can send photos. What do you need from me to get replacements out?"
+        }
+      },
+      {
+        "json": {
+          "inquiry_id": "INQ-02",
+          "id": "18f2a2",
+          "date": "2026-09-01T08:41:00",
+          "from": "j.okonkwo@fastmail.example",
+          "name": "Jane",
+          "phone": "",
+          "order_number": "ORD-88231",
+          "subject": "Delivery date for ORD-88231",
+          "text": "Hi, writing from my personal address as I am away from the office. Could you tell me where order ORD-88231 has got to? It was supposed to land last Thursday and the site crew are waiting on it."
+        }
+      },
+      {
+        "json": {
+          "inquiry_id": "INQ-04",
+          "id": "18f2a3",
+          "date": "2026-09-01T09:03:00",
+          "from": "info@northgate.example",
+          "name": "",
+          "phone": "",
+          "order_number": "",
+          "subject": "Question about a delivery",
+          "text": "Can someone let us know when the next delivery is scheduled? We have not had a confirmation email this month."
+        }
+      },
+      {
+        "json": {
+          "inquiry_id": "INQ-06",
+          "id": "18f2a4",
+          "date": "2026-09-01T10:22:00",
+          "from": "kofi.mensah@stonebridge.example",
+          "name": "Kofi Mensah",
+          "phone": "",
+          "order_number": "ORD-8823",
+          "subject": "Wrong item in ORD-8823",
+          "text": "The pallet we received under order ORD-8823 has the wrong finish on it. We ordered matte and this is gloss. Can we arrange a collection?"
+        }
+      }
+    ],
+    "Website Support Form": [
+      {
+        "json": {
+          "inquiry_id": "INQ-03",
+          "submitted_at": "2026-09-01T08:55:00",
+          "full_name": "Dan Okonkwo",
+          "email_address": "dan.okonkwo88@mailbox.example",
+          "phone_number": "(555) 555-0156",
+          "order_reference": "",
+          "topic": "Returns",
+          "enquiry": "I need to return an unopened box from a delivery a couple of weeks ago. I do not have the order number to hand, sorry. The phone number here is the one on the account."
+        }
+      },
+      {
+        "json": {
+          "inquiry_id": "INQ-05",
+          "submitted_at": "2026-09-01T11:07:00",
+          "full_name": "Hana Suzuki",
+          "email_address": "hana.suzuki@meridian.example",
+          "phone_number": "555-555-0233",
+          "order_reference": "",
+          "topic": "New enquiry",
+          "enquiry": "We are fitting out three units next spring and would like to talk about trade pricing on the oak range. Who is the right person to speak to?"
+        }
+      }
+    ],
+    "Customer Lookup (CRM)": [
+      {
+        "json": {
+          "customer_id": "C-1001",
+          "customer_name": "Jane Okonkwo",
+          "customer_email": "jane.okonkwo@brightwater.example",
+          "customer_phone": "+1 (555) 555-0142",
+          "customer_since": "2024-03-11",
+          "key": "jane.okonkwo@brightwater.example",
+          "key_type": "email"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1001",
+          "customer_name": "Jane Okonkwo",
+          "customer_email": "jane.okonkwo@brightwater.example",
+          "customer_phone": "+1 (555) 555-0142",
+          "customer_since": "2024-03-11",
+          "key": "5555550142",
+          "key_type": "phone"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1001",
+          "customer_name": "Jane Okonkwo",
+          "customer_email": "jane.okonkwo@brightwater.example",
+          "customer_phone": "+1 (555) 555-0142",
+          "customer_since": "2024-03-11",
+          "key": "ORD-88231",
+          "key_type": "order"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1002",
+          "customer_name": "Daniel Okonkwo",
+          "customer_email": "d.okonkwo@brightwater.example",
+          "customer_phone": "(555) 555-0156",
+          "customer_since": "2025-01-27",
+          "key": "d.okonkwo@brightwater.example",
+          "key_type": "email"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1002",
+          "customer_name": "Daniel Okonkwo",
+          "customer_email": "d.okonkwo@brightwater.example",
+          "customer_phone": "(555) 555-0156",
+          "customer_since": "2025-01-27",
+          "key": "5555550156",
+          "key_type": "phone"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1003",
+          "customer_name": "Marisol Vega",
+          "customer_email": "marisol@vegaflooring.example",
+          "customer_phone": "555.555.0177",
+          "customer_since": "2023-09-02",
+          "key": "marisol@vegaflooring.example",
+          "key_type": "email"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1003",
+          "customer_name": "Marisol Vega",
+          "customer_email": "marisol@vegaflooring.example",
+          "customer_phone": "555.555.0177",
+          "customer_since": "2023-09-02",
+          "key": "5555550177",
+          "key_type": "phone"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1003",
+          "customer_name": "Marisol Vega",
+          "customer_email": "marisol@vegaflooring.example",
+          "customer_phone": "555.555.0177",
+          "customer_since": "2023-09-02",
+          "key": "ORD-88410",
+          "key_type": "order"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1004",
+          "customer_name": "Ray Whitfield",
+          "customer_email": "info@northgate.example",
+          "customer_phone": "+1 555 555 0198",
+          "customer_since": "2025-06-14",
+          "key": "info@northgate.example",
+          "key_type": "email"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1004",
+          "customer_name": "Ray Whitfield",
+          "customer_email": "info@northgate.example",
+          "customer_phone": "+1 555 555 0198",
+          "customer_since": "2025-06-14",
+          "key": "5555550198",
+          "key_type": "phone"
+        }
+      },
+      {
+        "json": {
+          "customer_id": "C-1004",
+          "customer_name": "Ray Whitfield",
+          "customer_email": "info@northgate.example",
+          "customer_phone": "+1 555 555 0198",
+          "customer_since": "2025-06-14",
+          "key": "ORD-88502",
+          "key_type": "order"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

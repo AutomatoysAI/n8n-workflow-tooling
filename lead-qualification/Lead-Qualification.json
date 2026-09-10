@@ -1,0 +1,1311 @@
+{
+  "name": "Lead Qualification",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nSeven website enquiries off one contact form on one morning.\n\n**Two are hot** and sales hears about them within the minute. **One is warm** and\ngets an acknowledgement, not a phone call. **Two are not a fit** - one is an\nagency selling to us, one is somebody after a job. **One needs a person to\ndecide.** **One never reaches the model at all.**\n\nEvery one of the seven ends up on a list, including the ones nothing was done\nabout. A lead that quietly evaporates is the failure this whole design is built\nagainst - and the bottom of the canvas is the half that catches the ones that\nevaporate for a reason nobody predicted.",
+        "height": 340,
+        "width": 440,
+        "color": 4
+      },
+      "id": "f1000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2360,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The dropdowns say how big. The message says whether it is real.\n\nThis is the sentence to open the interview with, because it is where most\nversions of this workflow go wrong in both directions.\n\n**Budget and timeline are dropdowns.** They do not need a model - a model that\nreads \"Over £50,000\" correctly 97 times out of 100 misfiles three leads in every\nhundred, and nobody notices for a month. So `Score the Lead` is a Set node doing\narithmetic on the form's own fields, and it is right every time.\n\n**The free-text box does need a model, and L-03 is why.** An agency selling lead\ngeneration ticked *Over £50,000* and *Within a month*, because that is how you\nget attention. Every number on that form says drop everything. Only the words\nsay it is a pitch. Arithmetic alone would have put a salesperson on the phone to\na salesperson.\n\n**So the model categorises and never scores.** It answers one question - what\nkind of message is this - and hands back the words it read that from. A Set node\nand a Switch decide what happens. That ordering is the design, and it is the\nthing to defend when they ask.",
+        "height": 460,
+        "width": 520,
+        "color": 3
+      },
+      "id": "f1000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1890,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Sales is told before the CRM is written to\n\nLook at the order on the Hot lane: **notify, draft, then write the record.**\nThat is deliberate and it is worth saying out loud.\n\nIf the CRM is unreachable at 4pm on a Friday, the version that writes first\nnever gets as far as the notification, and the best lead of the week sits in a\nfailed execution nobody opens until Monday. This way the rep already has it.\n\n**In exchange the Slack message cannot carry a link to the record** - it carries\nthe enquiry itself, which is what the rep actually needs to make the call.",
+        "height": 300,
+        "width": 420,
+        "color": 6
+      },
+      "id": "f1000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1350,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Two ways a run breaks, and they are not the same failure\n\n**One lead fails.** `Create or Update the Contact` is set to try three times, and\nthen to send that lead out of its **second output** instead of stopping. The\nother six carry on. You still have the lead, so the log gets the name and the\nemail and somebody can re-run it.\n\n**The whole run dies.** `When the Whole Run Fails` catches anything else -\nincluding the things nobody predicted. Look at what n8n hands it: the workflow,\nthe node, the message, and a link. **And no trace of whose lead it was.** That is\nwhy the log row says *open the execution* - a person gets there in thirty\nseconds, which is thirty seconds better than never knowing.\n\n**The point of both, in one line for the client:** they find out from the log,\nnot from the customer.\n\n**The setup step everybody misses:** an Error Trigger does nothing until a\nworkflow is pointed at it. After importing, open **Settings → Error Workflow**\non this workflow and choose *this same workflow*. Skip that and the bottom half\nof this canvas is decoration.",
+        "height": 480,
+        "width": 500,
+        "color": 5
+      },
+      "id": "f1000000-0000-4000-8000-000000000004",
+      "name": "Note 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -560
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "f1000000-0000-4000-8000-000000000005",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2340,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Form Submissions",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000006",
+      "name": "Website Form Submissions",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2120,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "latchford-enquiry",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000007",
+      "name": "Live Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2120,
+        380
+      ],
+      "disabled": true,
+      "webhookId": "f1000000-0000-4000-8000-0000000000aa"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "lead_id",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "a2",
+              "name": "submitted_at",
+              "type": "string",
+              "value": "={{ $json.submitted_at }}"
+            },
+            {
+              "id": "a3",
+              "name": "source_page",
+              "type": "string",
+              "value": "={{ $json.source_page }}"
+            },
+            {
+              "id": "a4",
+              "name": "name",
+              "type": "string",
+              "value": "={{ ($json.name || '').trim() }}"
+            },
+            {
+              "id": "a5",
+              "name": "email",
+              "type": "string",
+              "value": "={{ ($json.email || '').trim().toLowerCase() }}"
+            },
+            {
+              "id": "a6",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "id": "a7",
+              "name": "company",
+              "type": "string",
+              "value": "={{ $json.company }}"
+            },
+            {
+              "id": "a8",
+              "name": "region",
+              "type": "string",
+              "value": "={{ $json.region }}"
+            },
+            {
+              "id": "a9",
+              "name": "budget_band",
+              "type": "string",
+              "value": "={{ $json.budget_band }}"
+            },
+            {
+              "id": "a10",
+              "name": "timeline",
+              "type": "string",
+              "value": "={{ $json.timeline }}"
+            },
+            {
+              "id": "a11",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "id": "a12",
+              "name": "honeypot",
+              "type": "string",
+              "value": "={{ ($json.website || '').trim() }}"
+            },
+            {
+              "id": "a13",
+              "name": "email_looks_real",
+              "type": "string",
+              "value": "={{ /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(($json.email || '').trim()) ? 'yes' : 'no' }}"
+            },
+            {
+              "id": "a14",
+              "name": "enquiry_type",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "a15",
+              "name": "wants",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "a16",
+              "name": "evidence",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "a17",
+              "name": "tier",
+              "type": "string",
+              "value": "Spam"
+            },
+            {
+              "id": "a18",
+              "name": "why",
+              "type": "string",
+              "value": "={{ ($json.website || '').trim() !== '' ? 'The hidden field was filled in, so a person did not type this.' : 'The email address is not a working shape.' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000008",
+      "name": "Read the Form as a Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1880,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "g1",
+              "leftValue": "={{ $json.honeypot }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "g2",
+              "leftValue": "={{ $json.email_looks_real }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000009",
+      "name": "Spam, or a Real Person?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1650,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0,
+          "maxTokens": 600
+        }
+      },
+      "id": "f1000000-0000-4000-8000-000000000010",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1420,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=Read this website enquiry and answer one question: what kind of message is it?\n\nenquiry_type must be exactly one of:\n\n- new_project - somebody who wants work doing and is not already a customer. Includes\n  asking what something would cost or what a contract would look like.\n- existing_customer - already buys from us, and this is about extending, adding a site,\n  or changing what they already have.\n- supplier_or_pitch - somebody selling something TO us. Agencies, software, recruiters,\n  finance, SEO, lead generation. The tell is that the sender is offering, not asking.\n- job_application - somebody who wants a job.\n- other - anything else, including a message with nothing in it.\n\n**Judge only the words in the message.** The budget and timeline boxes on the form are\nfilled in by whoever sent it, so a sales pitch can and does tick the biggest budget and\nthe shortest timeline. Do not let those change your answer. You are not being asked how\nvaluable the enquiry is - something else works that out.\n\nwants is one plain sentence saying what the sender is after, in their terms.\n\nevidence is the run of words from the message that made you choose that enquiry_type,\ncopied out of the message exactly. If you cannot find one, the type is other.\n\nENQUIRY from {{ $json.name }} at {{ $json.company || 'no company given' }}:\n{{ $json.message }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"enquiry_type\": \"new_project\",\n  \"wants\": \"A replacement quote and an install date for two failed rooftop chillers\",\n  \"evidence\": \"we need a replacement quote and an install date\"\n}",
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000011",
+      "name": "Read What They Are Asking For",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "lead_id",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.lead_id }}"
+            },
+            {
+              "id": "a2",
+              "name": "submitted_at",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.submitted_at }}"
+            },
+            {
+              "id": "a3",
+              "name": "source_page",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.source_page }}"
+            },
+            {
+              "id": "a4",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.name }}"
+            },
+            {
+              "id": "a5",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.email }}"
+            },
+            {
+              "id": "a6",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.phone }}"
+            },
+            {
+              "id": "a7",
+              "name": "company",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.company }}"
+            },
+            {
+              "id": "a8",
+              "name": "region",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.region }}"
+            },
+            {
+              "id": "a9",
+              "name": "budget_band",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.budget_band }}"
+            },
+            {
+              "id": "a10",
+              "name": "timeline",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.timeline }}"
+            },
+            {
+              "id": "a11",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $('Read the Form as a Lead').item.json.message }}"
+            },
+            {
+              "id": "a12",
+              "name": "enquiry_type",
+              "type": "string",
+              "value": "={{ (($json.output || {}).enquiry_type || 'other') }}"
+            },
+            {
+              "id": "a13",
+              "name": "wants",
+              "type": "string",
+              "value": "={{ ($json.output || {}).wants || '' }}"
+            },
+            {
+              "id": "a14",
+              "name": "evidence",
+              "type": "string",
+              "value": "={{ ($json.output || {}).evidence || '' }}"
+            },
+            {
+              "id": "a15",
+              "name": "in_service_area",
+              "type": "string",
+              "value": "={{ ([\"East Midlands\", \"West Midlands\", \"Yorkshire\", \"North West\", \"North East\"].includes($('Read the Form as a Lead').item.json.region)) ? 'yes' : 'no' }}"
+            },
+            {
+              "id": "a16",
+              "name": "budget_worth_chasing",
+              "type": "string",
+              "value": "={{ ([\"\\u00a310,000 - \\u00a350,000\", \"Over \\u00a350,000\"].includes($('Read the Form as a Lead').item.json.budget_band)) ? 'yes' : 'no' }}"
+            },
+            {
+              "id": "a17",
+              "name": "wants_it_soon",
+              "type": "string",
+              "value": "={{ ([\"Within a month\", \"1 - 3 months\"].includes($('Read the Form as a Lead').item.json.timeline)) ? 'yes' : 'no' }}"
+            },
+            {
+              "id": "a18",
+              "name": "tier",
+              "type": "string",
+              "value": "={{ !([\"new_project\", \"existing_customer\"].includes((($json.output || {}).enquiry_type || 'other'))) ? 'Not a fit' : (!([\"East Midlands\", \"West Midlands\", \"Yorkshire\", \"North West\", \"North East\"].includes($('Read the Form as a Lead').item.json.region)) ? 'Needs a person' : (([\"\\u00a310,000 - \\u00a350,000\", \"Over \\u00a350,000\"].includes($('Read the Form as a Lead').item.json.budget_band) && [\"Within a month\", \"1 - 3 months\"].includes($('Read the Form as a Lead').item.json.timeline)) ? 'Hot' : 'Warm')) }}"
+            },
+            {
+              "id": "a19",
+              "name": "why",
+              "type": "string",
+              "value": "={{ !([\"new_project\", \"existing_customer\"].includes((($json.output || {}).enquiry_type || 'other'))) ? ('The message is ' + ((($json.output || {}).enquiry_type || 'other') === 'job_application' ? 'a job application' : ((($json.output || {}).enquiry_type || 'other') === 'supplier_or_pitch' ? 'somebody selling to us' : 'not an enquiry')) + ', whatever the form says.') : (!([\"East Midlands\", \"West Midlands\", \"Yorkshire\", \"North West\", \"North East\"].includes($('Read the Form as a Lead').item.json.region)) ? ('A real project worth having, but ' + $('Read the Form as a Lead').item.json.region + ' is outside the service area.') : (([\"\\u00a310,000 - \\u00a350,000\", \"Over \\u00a350,000\"].includes($('Read the Form as a Lead').item.json.budget_band) && [\"Within a month\", \"1 - 3 months\"].includes($('Read the Form as a Lead').item.json.timeline)) ? (((($json.output || {}).enquiry_type || 'other') === 'existing_customer' ? 'Existing customer, ' : 'New enquiry, ') + $('Read the Form as a Lead').item.json.budget_band + ', wants it ' + $('Read the Form as a Lead').item.json.timeline + '.') : 'A real enquiry, but no budget or date attached to it yet.')) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000012",
+      "name": "Score the Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1180,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "s1",
+                    "leftValue": "={{ $json.tier }}",
+                    "rightValue": "Hot",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot - tell sales now"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "s2",
+                    "leftValue": "={{ $json.tier }}",
+                    "rightValue": "Warm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm - acknowledge it"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "s3",
+                    "leftValue": "={{ $json.tier }}",
+                    "rightValue": "Not a fit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Not a fit - log it only"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Needs a person"
+        }
+      },
+      "id": "f1000000-0000-4000-8000-000000000013",
+      "name": "Where Does It Go?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -940,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "new-leads",
+          "mode": "name"
+        },
+        "text": "=*{{ $json.name }} at {{ $json.company }}* - {{ $json.budget_band }}, {{ $json.timeline }}\n{{ $json.wants }}\n\n_{{ $json.why }}_\n{{ $json.email }} · {{ $json.phone }} · from {{ $json.source_page }}",
+        "otherOptions": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000014",
+      "name": "Tell Sales Now",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -700,
+        0
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write the first reply to this enquiry, from Ade Fanshawe at Latchford Cooling, commercial refrigeration and air conditioning - installation, planned servicing and 24-hour breakdown cover.\n\nRules:\n- Four short paragraphs at most. No greeting longer than one line.\n- Answer what they actually asked, in their own terms.\n- **Do not quote a price, a lead time, an install date or a discount.** You do not have that information and Ade does. Say he will confirm it.\n- Do not promise anything about availability or engineers.\n- Ask at most one question, and only if the enquiry cannot move without it.\n- No marketing language. Plain, quick, useful.\n\nTHEIR ENQUIRY:\n{{ $('Score the Lead').item.json.message }}\n\nWHAT THEY WANT: {{ $('Score the Lead').item.json.wants }}",
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "f1000000-0000-4000-8000-000000000015",
+      "name": "Write the Reply for Ade",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: your enquiry about {{ $('Score the Lead').item.json.wants }}",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {
+          "sendTo": "={{ $('Score the Lead').item.json.email }}"
+        }
+      },
+      "id": "f1000000-0000-4000-8000-000000000016",
+      "name": "Save It as a Draft",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -220,
+        0
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Thanks for getting in touch with Latchford Cooling",
+        "emailType": "text",
+        "message": "=Hi {{ $json.name.split(' ')[0] }},\n\nThanks for your enquiry about {{ $json.source_page.replace('/', '').replace(/-/g, ' ') }}. It has reached the right team and {{ $('Score the Lead').item.json.tier === 'Warm' ? 'someone will come back to you within two working days' : 'someone will be in touch' }}.\n\nIf it is urgent in the meantime, our breakdown line is open 24 hours.\n\nAde Fanshawe\nLatchford Cooling",
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000017",
+      "name": "Send the Acknowledgement",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -700,
+        220
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "new-leads",
+          "mode": "name"
+        },
+        "text": "=*Worth a human decision:* {{ $json.name }} at {{ $json.company }} - {{ $json.budget_band }}, {{ $json.timeline }}\n{{ $json.wants }}\n\n_{{ $json.why }}_\nNothing has been written to the CRM and nothing has been sent. {{ $json.email }}",
+        "otherOptions": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000018",
+      "name": "Ask Someone to Take a Look",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -700,
+        440
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_CRM_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Contacts",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Email"
+          ],
+          "value": {
+            "Email": "={{ $('Score the Lead').item.json.email }}",
+            "Name": "={{ $('Score the Lead').item.json.name }}",
+            "Company": "={{ $('Score the Lead').item.json.company }}",
+            "Phone": "={{ $('Score the Lead').item.json.phone }}",
+            "Region": "={{ $('Score the Lead').item.json.region }}",
+            "Lead Status": "={{ $('Score the Lead').item.json.tier }}",
+            "Budget": "={{ $('Score the Lead').item.json.budget_band }}",
+            "Timeline": "={{ $('Score the Lead').item.json.timeline }}",
+            "Wants": "={{ $('Score the Lead').item.json.wants }}",
+            "Last Enquiry": "={{ $('Score the Lead').item.json.submitted_at }}",
+            "Owner": "Ade Fanshawe"
+          }
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000019",
+      "name": "Create or Update the Contact",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        20,
+        100
+      ],
+      "disabled": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_CRM_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Lead Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead ID": "={{ $json.lead_id }}",
+            "Received": "={{ $json.submitted_at }}",
+            "Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Company": "={{ $json.company }}",
+            "Region": "={{ $json.region }}",
+            "Budget": "={{ $json.budget_band }}",
+            "Timeline": "={{ $json.timeline }}",
+            "Enquiry Type": "={{ $json.enquiry_type || 'not read' }}",
+            "What They Want": "={{ $json.wants }}",
+            "Verdict": "={{ $json.tier }}",
+            "Why": "={{ $json.why }}",
+            "What Happened Next": "={{ ({\"Hot\": \"Told sales, and a reply drafted for Ade to check\", \"Warm\": \"Acknowledgement sent, no sales ping\", \"Not a fit\": \"Logged only - nobody was contacted\", \"Needs a person\": \"Held - a person decides\", \"Spam\": \"Dropped before it reached the model\"})[$json.tier] }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000020",
+      "name": "Record the Outcome",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -460,
+        660
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "f1000000-0000-4000-8000-000000000021",
+      "name": "When the Whole Run Fails",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2340,
+        940
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "failure_kind",
+              "type": "string",
+              "value": "The whole run stopped"
+            },
+            {
+              "id": "a2",
+              "name": "workflow",
+              "type": "string",
+              "value": "={{ $json.workflow.name }}"
+            },
+            {
+              "id": "a3",
+              "name": "what_broke",
+              "type": "string",
+              "value": "={{ $json.execution.lastNodeExecuted }}"
+            },
+            {
+              "id": "a4",
+              "name": "error_message",
+              "type": "string",
+              "value": "={{ $json.execution.error.message }}"
+            },
+            {
+              "id": "a5",
+              "name": "lead",
+              "type": "string",
+              "value": "Not known from here - open the execution"
+            },
+            {
+              "id": "a6",
+              "name": "where_to_look",
+              "type": "string",
+              "value": "={{ $json.execution.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000022",
+      "name": "What Broke?",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2060,
+        940
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "failure_kind",
+              "type": "string",
+              "value": "One lead failed, the rest carried on"
+            },
+            {
+              "id": "a2",
+              "name": "workflow",
+              "type": "string",
+              "value": "Lead Qualification"
+            },
+            {
+              "id": "a3",
+              "name": "what_broke",
+              "type": "string",
+              "value": "Create or Update the Contact"
+            },
+            {
+              "id": "a4",
+              "name": "error_message",
+              "type": "string",
+              "value": "={{ ($json.error || {}).message || 'no message given' }}"
+            },
+            {
+              "id": "a5",
+              "name": "lead",
+              "type": "string",
+              "value": "={{ $('Score the Lead').item.json.name }} <{{ $('Score the Lead').item.json.email }}> - {{ $('Score the Lead').item.json.tier }}"
+            },
+            {
+              "id": "a6",
+              "name": "where_to_look",
+              "type": "string",
+              "value": "={{ $execution.id ? ('execution ' + $execution.id) : '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000023",
+      "name": "Which Lead Failed?",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1620,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_CRM_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Failures",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "When": "={{ $now.toISO() }}",
+            "Kind": "={{ $json.failure_kind }}",
+            "Workflow": "={{ $json.workflow }}",
+            "Node": "={{ $json.what_broke }}",
+            "Error": "={{ $json.error_message }}",
+            "Lead": "={{ $json.lead }}",
+            "Where To Look": "={{ $json.where_to_look }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000024",
+      "name": "Log It Where Someone Will See It",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1360,
+        940
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "automation-health",
+          "mode": "name"
+        },
+        "text": "=*{{ $json.failure_kind }}* - {{ $json.workflow }}\nNode: {{ $json.what_broke }}\n{{ $json.error_message }}\nLead: {{ $json.lead }}\n{{ $json.where_to_look }}",
+        "otherOptions": {}
+      },
+      "id": "f1000000-0000-4000-8000-000000000025",
+      "name": "Page Whoever Is On",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -1100,
+        940
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Website Form Submissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Form Submissions": {
+      "main": [
+        [
+          {
+            "node": "Read the Form as a Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Live Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read the Form as a Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the Form as a Lead": {
+      "main": [
+        [
+          {
+            "node": "Spam, or a Real Person?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spam, or a Real Person?": {
+      "main": [
+        [
+          {
+            "node": "Read What They Are Asking For",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record the Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Read What They Are Asking For",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Write the Reply for Ade",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read What They Are Asking For": {
+      "main": [
+        [
+          {
+            "node": "Score the Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score the Lead": {
+      "main": [
+        [
+          {
+            "node": "Where Does It Go?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Where Does It Go?": {
+      "main": [
+        [
+          {
+            "node": "Tell Sales Now",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Record the Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send the Acknowledgement",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Record the Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Record the Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask Someone to Take a Look",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Record the Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tell Sales Now": {
+      "main": [
+        [
+          {
+            "node": "Write the Reply for Ade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Reply for Ade": {
+      "main": [
+        [
+          {
+            "node": "Save It as a Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save It as a Draft": {
+      "main": [
+        [
+          {
+            "node": "Create or Update the Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the Acknowledgement": {
+      "main": [
+        [
+          {
+            "node": "Create or Update the Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or Update the Contact": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Which Lead Failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Which Lead Failed?": {
+      "main": [
+        [
+          {
+            "node": "Log It Where Someone Will See It",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When the Whole Run Fails": {
+      "main": [
+        [
+          {
+            "node": "What Broke?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Broke?": {
+      "main": [
+        [
+          {
+            "node": "Log It Where Someone Will See It",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log It Where Someone Will See It": {
+      "main": [
+        [
+          {
+            "node": "Page Whoever Is On",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Website Form Submissions": [
+      {
+        "json": {
+          "id": "L-01",
+          "submitted_at": "2026-09-02T07:41:00Z",
+          "source_page": "/commercial-refrigeration",
+          "name": "Priya Raghunathan",
+          "email": "p.raghunathan@kestevenfoods.example",
+          "phone": "07700 900118",
+          "company": "Kesteven Foods",
+          "region": "East Midlands",
+          "budget_band": "Over £50,000",
+          "timeline": "Within a month",
+          "message": "Both rooftop chillers on our Grantham site failed the last inspection and our BRC audit is on the 14th. We need a replacement quote and an install date we can actually hold to. Site is running 24/6 so any work has to be out of hours.",
+          "website": ""
+        }
+      },
+      {
+        "json": {
+          "id": "L-02",
+          "submitted_at": "2026-09-02T09:06:00Z",
+          "source_page": "/planned-maintenance",
+          "name": "Tom Blackwood",
+          "email": "tom@blackwoodbutchers.example",
+          "phone": "07700 900204",
+          "company": "Blackwood Butchers",
+          "region": "West Midlands",
+          "budget_band": "Not sure yet",
+          "timeline": "3 - 6 months",
+          "message": "We have four display cabinets and a walk-in across two shops and no maintenance contract at the moment, we just call someone when something goes wrong. Wondering what a planned servicing arrangement would look like and roughly what it costs.",
+          "website": ""
+        }
+      },
+      {
+        "json": {
+          "id": "L-03",
+          "submitted_at": "2026-09-02T09:52:00Z",
+          "source_page": "/contact",
+          "name": "Jordan Vale",
+          "email": "jordan@growthlanepartners.example",
+          "phone": "07700 900771",
+          "company": "GrowthLane Partners",
+          "region": "East Midlands",
+          "budget_band": "Over £50,000",
+          "timeline": "Within a month",
+          "message": "Hi there, I work with HVAC and refrigeration firms across the Midlands and we consistently add 25-40 qualified enquiries a month through paid search and outbound. I had a look at your site and spotted three quick wins. Happy to send over a free audit and jump on a 15 minute call this week?",
+          "website": ""
+        }
+      },
+      {
+        "json": {
+          "id": "L-04",
+          "submitted_at": "2026-09-02T10:03:00Z",
+          "source_page": "/contact",
+          "name": "cheap-seo-offer",
+          "email": "noreply@bulkmailer.example",
+          "phone": "0000000000",
+          "company": "SEO Deals",
+          "region": "East Midlands",
+          "budget_band": "Over £50,000",
+          "timeline": "Within a month",
+          "message": "TOP RANKING GUARANTEED first page google 30 days click here https://ranks.example/offer",
+          "website": "https://ranks.example/offer"
+        }
+      },
+      {
+        "json": {
+          "id": "L-05",
+          "submitted_at": "2026-09-02T11:20:00Z",
+          "source_page": "/commercial-refrigeration",
+          "name": "Eilidh MacAulay",
+          "email": "e.macaulay@brackenpointseafood.example",
+          "phone": "07700 900332",
+          "company": "Brackenpoint Seafood",
+          "region": "Highlands and Islands",
+          "budget_band": "Over £50,000",
+          "timeline": "Within a month",
+          "message": "We are fitting out a new processing unit and need blast freezing and chilled storage designed and installed. I know you are a long way from us but you did the Aberdeen job for our parent company two years ago and they rated you.",
+          "website": ""
+        }
+      },
+      {
+        "json": {
+          "id": "L-06",
+          "submitted_at": "2026-09-02T13:47:00Z",
+          "source_page": "/contact",
+          "name": "Callum Hedley",
+          "email": "callum.hedley@fastmail.example",
+          "phone": "07700 900465",
+          "company": "",
+          "region": "East Midlands",
+          "budget_band": "Not sure yet",
+          "timeline": "Within a month",
+          "message": "Good afternoon. I am an FGas qualified refrigeration engineer with nine years on supermarket estates, currently on notice. I saw you are expanding the Derby team. CV attached, happy to come in for a chat any day next week.",
+          "website": ""
+        }
+      },
+      {
+        "json": {
+          "id": "L-07",
+          "submitted_at": "2026-09-02T16:58:00Z",
+          "source_page": "/breakdown-cover",
+          "name": "Dean Marsh",
+          "email": "d.marsh@orrellhaulage.example",
+          "phone": "07700 900590",
+          "company": "Orrell Haulage",
+          "region": "North West",
+          "budget_band": "£10,000 - £50,000",
+          "timeline": "1 - 3 months",
+          "message": "You already cover our Warrington depot. We are taking on a second unit in Bolton in November with four chilled bays and want it added to the same cover agreement. Who do I speak to about pricing it up?",
+          "website": ""
+        }
+      }
+    ],
+    "When the Whole Run Fails": [
+      {
+        "json": {
+          "execution": {
+            "id": "41827",
+            "url": "https://n8n.latchford-cooling.example/workflow/8/executions/41827",
+            "retryOf": null,
+            "lastNodeExecuted": "Create or Update the Contact",
+            "mode": "trigger",
+            "error": {
+              "message": "429 - Too Many Requests. The service is receiving too many requests from you. Try again later.",
+              "name": "NodeApiError",
+              "stack": "NodeApiError: 429 - Too Many Requests"
+            }
+          },
+          "workflow": {
+            "id": "8",
+            "name": "Lead Qualification"
+          }
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

@@ -1,0 +1,193 @@
+{
+  "company": {
+    "name": "Latchford Cooling",
+    "what_they_do": "commercial refrigeration and air conditioning - installation, planned servicing and 24-hour breakdown cover",
+    "based": "Derby, England",
+    "service_area": ["East Midlands", "West Midlands", "Yorkshire", "North West", "North East"],
+    "sales_rep": {"name": "Ade Fanshawe", "email": "ade@latchford-cooling.example"},
+    "sales_channel": "#new-leads",
+    "health_channel": "#automation-health",
+    "big_budgets": ["£10,000 - £50,000", "Over £50,000"],
+    "soon_timelines": ["Within a month", "1 - 3 months"]
+  },
+
+  "form_fields": {
+    "what_the_website_form_collects": [
+      "name", "email", "phone", "company", "region (dropdown)",
+      "budget_band (dropdown)", "timeline (dropdown)", "message (free text)"
+    ],
+    "website": "A hidden field. A person filling in the form never sees it, so it is always empty. A bot fills in every field it finds. Anything in here means the submission was not typed by a human."
+  },
+
+  "leads": [
+    {
+      "id": "L-01",
+      "submitted_at": "2026-09-02T07:41:00Z",
+      "source_page": "/commercial-refrigeration",
+      "name": "Priya Raghunathan",
+      "email": "p.raghunathan@kestevenfoods.example",
+      "phone": "07700 900118",
+      "company": "Kesteven Foods",
+      "region": "East Midlands",
+      "budget_band": "Over £50,000",
+      "timeline": "Within a month",
+      "message": "Both rooftop chillers on our Grantham site failed the last inspection and our BRC audit is on the 14th. We need a replacement quote and an install date we can actually hold to. Site is running 24/6 so any work has to be out of hours.",
+      "website": "",
+      "expected_extraction": {
+        "enquiry_type": "new_project",
+        "wants": "Replacement quote and an out-of-hours install date for two failed rooftop chillers before a BRC audit on the 14th",
+        "evidence": "we need a replacement quote and an install date"
+      },
+      "expected_lane": "hot"
+    },
+    {
+      "id": "L-02",
+      "submitted_at": "2026-09-02T09:06:00Z",
+      "source_page": "/planned-maintenance",
+      "name": "Tom Blackwood",
+      "email": "tom@blackwoodbutchers.example",
+      "phone": "07700 900204",
+      "company": "Blackwood Butchers",
+      "region": "West Midlands",
+      "budget_band": "Not sure yet",
+      "timeline": "3 - 6 months",
+      "message": "We have four display cabinets and a walk-in across two shops and no maintenance contract at the moment, we just call someone when something goes wrong. Wondering what a planned servicing arrangement would look like and roughly what it costs.",
+      "website": "",
+      "expected_extraction": {
+        "enquiry_type": "new_project",
+        "wants": "A rough shape and price for a planned servicing contract covering four display cabinets and a walk-in across two shops",
+        "evidence": "wondering what a planned servicing arrangement would look like"
+      },
+      "expected_lane": "warm"
+    },
+    {
+      "id": "L-03",
+      "submitted_at": "2026-09-02T09:52:00Z",
+      "source_page": "/contact",
+      "name": "Jordan Vale",
+      "email": "jordan@growthlanepartners.example",
+      "phone": "07700 900771",
+      "company": "GrowthLane Partners",
+      "region": "East Midlands",
+      "budget_band": "Over £50,000",
+      "timeline": "Within a month",
+      "message": "Hi there, I work with HVAC and refrigeration firms across the Midlands and we consistently add 25-40 qualified enquiries a month through paid search and outbound. I had a look at your site and spotted three quick wins. Happy to send over a free audit and jump on a 15 minute call this week?",
+      "website": "",
+      "expected_extraction": {
+        "enquiry_type": "supplier_or_pitch",
+        "wants": "To sell Latchford Cooling a lead generation service",
+        "evidence": "happy to send over a free audit and jump on a 15 minute call"
+      },
+      "expected_lane": "not a fit"
+    },
+    {
+      "id": "L-04",
+      "submitted_at": "2026-09-02T10:03:00Z",
+      "source_page": "/contact",
+      "name": "cheap-seo-offer",
+      "email": "noreply@bulkmailer.example",
+      "phone": "0000000000",
+      "company": "SEO Deals",
+      "region": "East Midlands",
+      "budget_band": "Over £50,000",
+      "timeline": "Within a month",
+      "message": "TOP RANKING GUARANTEED first page google 30 days click here https://ranks.example/offer",
+      "website": "https://ranks.example/offer",
+      "expected_extraction": null,
+      "expected_lane": "spam"
+    },
+    {
+      "id": "L-05",
+      "submitted_at": "2026-09-02T11:20:00Z",
+      "source_page": "/commercial-refrigeration",
+      "name": "Eilidh MacAulay",
+      "email": "e.macaulay@brackenpointseafood.example",
+      "phone": "07700 900332",
+      "company": "Brackenpoint Seafood",
+      "region": "Highlands and Islands",
+      "budget_band": "Over £50,000",
+      "timeline": "Within a month",
+      "message": "We are fitting out a new processing unit and need blast freezing and chilled storage designed and installed. I know you are a long way from us but you did the Aberdeen job for our parent company two years ago and they rated you.",
+      "website": "",
+      "expected_extraction": {
+        "enquiry_type": "new_project",
+        "wants": "Blast freezing and chilled storage designed and installed for a new processing unit",
+        "evidence": "need blast freezing and chilled storage designed and installed"
+      },
+      "expected_lane": "needs a person"
+    },
+    {
+      "id": "L-06",
+      "submitted_at": "2026-09-02T13:47:00Z",
+      "source_page": "/contact",
+      "name": "Callum Hedley",
+      "email": "callum.hedley@fastmail.example",
+      "phone": "07700 900465",
+      "company": "",
+      "region": "East Midlands",
+      "budget_band": "Not sure yet",
+      "timeline": "Within a month",
+      "message": "Good afternoon. I am an FGas qualified refrigeration engineer with nine years on supermarket estates, currently on notice. I saw you are expanding the Derby team. CV attached, happy to come in for a chat any day next week.",
+      "website": "",
+      "expected_extraction": {
+        "enquiry_type": "job_application",
+        "wants": "A job as a refrigeration engineer on the Derby team",
+        "evidence": "CV attached, happy to come in for a chat"
+      },
+      "expected_lane": "not a fit"
+    },
+    {
+      "id": "L-07",
+      "submitted_at": "2026-09-02T16:58:00Z",
+      "source_page": "/breakdown-cover",
+      "name": "Dean Marsh",
+      "email": "d.marsh@orrellhaulage.example",
+      "phone": "07700 900590",
+      "company": "Orrell Haulage",
+      "region": "North West",
+      "budget_band": "£10,000 - £50,000",
+      "timeline": "1 - 3 months",
+      "message": "You already cover our Warrington depot. We are taking on a second unit in Bolton in November with four chilled bays and want it added to the same cover agreement. Who do I speak to about pricing it up?",
+      "website": "",
+      "expected_extraction": {
+        "enquiry_type": "existing_customer",
+        "wants": "To add a second depot with four chilled bays to an existing breakdown cover agreement",
+        "evidence": "want it added to the same cover agreement"
+      },
+      "expected_lane": "hot"
+    }
+  ],
+
+  "expected_reasons": {
+    "L-01": "New enquiry, Over £50,000, wants it Within a month.",
+    "L-02": "A real enquiry, but no budget or date attached to it yet.",
+    "L-03": "The message is somebody selling to us, whatever the form says.",
+    "L-04": "The hidden field was filled in, so a person did not type this.",
+    "L-05": "A real project worth having, but Highlands and Islands is outside the service area.",
+    "L-06": "The message is a job application, whatever the form says.",
+    "L-07": "Existing customer, £10,000 - £50,000, wants it 1 - 3 months."
+  },
+
+  "failed_execution": {
+    "what_this_is": "What n8n hands the Error Trigger when a whole run dies. Pinned so the failure half of the canvas can be run on its own. Note what is in it and what is not: the node, the message and a link to the run - and no trace of whose lead it was.",
+    "execution": {
+      "id": "41827",
+      "url": "https://n8n.latchford-cooling.example/workflow/8/executions/41827",
+      "retryOf": null,
+      "lastNodeExecuted": "Create or Update the Contact",
+      "mode": "trigger",
+      "error": {
+        "message": "429 - Too Many Requests. The service is receiving too many requests from you. Try again later.",
+        "name": "NodeApiError",
+        "stack": "NodeApiError: 429 - Too Many Requests"
+      }
+    },
+    "workflow": {"id": "8", "name": "Lead Qualification"}
+  },
+
+  "notes": [
+    "Latchford Cooling and every person, company and site in this file are invented.",
+    ".example is a reserved test domain that cannot receive mail.",
+    "07700 900xxx is Ofcom's reserved range for drama and documentation - the numbers are unroutable."
+  ]
+}

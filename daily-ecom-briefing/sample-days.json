@@ -1,0 +1,64 @@
+{
+  "company": {
+    "name": "Copperleaf Goods",
+    "ceo": "Renata Alvim",
+    "ceo_email": "renata@copperleafgoods.example",
+    "finance_channel": "finance-alerts",
+    "finance_owner": "Ade Balogun - Finance",
+    "currency": "USD",
+    "tolerance_pct": 1.0
+  },
+  "today": "2026-09-02",
+
+  "_note": "Two days run through the same workflow. 2026-09-01 reconciles cleanly and sends. 2026-08-31 has a gap nothing explains, so it is held for a person instead. The gift-card line on the clean day is the point: redeeming a gift card is not new revenue - it was booked when the card was sold - so Shopify and the books disagree by exactly that amount and the disagreement is correct.",
+
+  "shopify_orders": [
+    { "order_number": "CG-4471", "date": "2026-09-01", "total_price": 4200.00, "refund_amount": 0.00, "tax": 430.00, "shipping": 95.00, "gift_card": 0.00, "channel": "Online Store" },
+    { "order_number": "CG-4472", "date": "2026-09-01", "total_price": 3180.00, "refund_amount": 640.00, "tax": 325.00, "shipping": 85.00, "gift_card": 0.00, "channel": "Online Store" },
+    { "order_number": "CG-4473", "date": "2026-09-01", "total_price": 5240.00, "refund_amount": 0.00, "tax": 545.00, "shipping": 120.00, "gift_card": 250.00, "channel": "Online Store" },
+    { "order_number": "CG-4474", "date": "2026-09-01", "total_price": 2650.00, "refund_amount": 0.00, "tax": 275.00, "shipping": 75.00, "gift_card": 0.00, "channel": "Amazon" },
+    { "order_number": "CG-4475", "date": "2026-09-01", "total_price": 3150.00, "refund_amount": 0.00, "tax": 335.00, "shipping": 90.00, "gift_card": 0.00, "channel": "Online Store" },
+
+    { "order_number": "CG-4462", "date": "2026-08-31", "total_price": 5100.00, "refund_amount": 0.00, "tax": 525.00, "shipping": 110.00, "gift_card": 0.00, "channel": "Online Store" },
+    { "order_number": "CG-4463", "date": "2026-08-31", "total_price": 4300.00, "refund_amount": 0.00, "tax": 445.00, "shipping": 100.00, "gift_card": 0.00, "channel": "Faire" },
+    { "order_number": "CG-4464", "date": "2026-08-31", "total_price": 3800.00, "refund_amount": 0.00, "tax": 395.00, "shipping": 95.00, "gift_card": 0.00, "channel": "Online Store" },
+    { "order_number": "CG-4465", "date": "2026-08-31", "total_price": 3700.00, "refund_amount": 0.00, "tax": 385.00, "shipping": 105.00, "gift_card": 0.00, "channel": "Faire" }
+  ],
+
+  "books": [
+    { "date": "2026-09-01", "booked_net_revenue": 15155.00, "source": "QuickBooks - Profit and Loss, net sales" },
+    { "date": "2026-08-31", "booked_net_revenue": 13180.00, "source": "QuickBooks - Profit and Loss, net sales" }
+  ],
+
+  "meta_ads": [
+    { "date": "2026-09-01", "spend": 2480.00, "attributed_revenue": 9340.00, "account": "act_YOUR_AD_ACCOUNT_ID" },
+    { "date": "2026-08-31", "spend": 2610.00, "attributed_revenue": 8900.00, "account": "act_YOUR_AD_ACCOUNT_ID" }
+  ],
+
+  "expected": {
+    "2026-09-01": {
+      "lane": "send",
+      "shopify_net": 15405.00,
+      "books_net": 15155.00,
+      "gap": 250.00,
+      "explained_by_gift_cards": 250.00,
+      "unexplained": 0.00,
+      "unexplained_pct": 0.0,
+      "number_of_record": 15155.00,
+      "orders": 5,
+      "blended_roas": 6.11
+    },
+    "2026-08-31": {
+      "lane": "hold",
+      "shopify_net": 14740.00,
+      "books_net": 13180.00,
+      "gap": 1560.00,
+      "explained_by_gift_cards": 0.00,
+      "unexplained": 1560.00,
+      "unexplained_pct": 10.6,
+      "number_of_record": 13180.00,
+      "orders": 4,
+      "blended_roas": 5.05
+    }
+  }
+}

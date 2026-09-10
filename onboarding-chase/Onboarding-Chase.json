@@ -1,0 +1,813 @@
+{
+  "name": "Onboarding Chase and Evidence",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nEight new clients owe the practice paperwork. Every weekday morning this looks\nat where each one stands and decides **one thing per client**: nudge them, leave\nthem alone, or hand them to a person.\n\nIt runs again tomorrow and decides again. **Nothing waits inside the workflow.**\n\nToday: three nudged, one closed off, one escalated, three deliberately left\nalone - and every one of those decisions is written down.",
+        "height": 300,
+        "width": 460,
+        "color": 4
+      },
+      "id": "e8000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1900,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Why there is no Wait node\n\nThe obvious build is: send the request, **Wait** three days, send a reminder,\n**Wait** four more. One tidy line on the canvas.\n\nIt is a trap. That execution sits open for a fortnight, and any n8n restart,\nupgrade or crash silently loses every pending chase. Nobody finds out until a\nclient says they were never contacted - and by then there is no record of what\nhappened, which in a regulated practice is worse than the missed chase.\n\n**The workflow stays stateless. The tracker is what is stateful.** A schedule\nre-reads the truth every morning and decides fresh. It survives a restart\nbecause there is nothing in flight to lose.\n\nThe weekend rule is not a node either - it is the cron expression on the\ntrigger, `0 9 * * 1-5`.",
+        "height": 380,
+        "width": 500,
+        "color": 3
+      },
+      "id": "e8000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1400,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Evidence, not status\n\n`Record What Happened` is **append-only**. Nothing in it is ever updated,\nbecause a row that can be edited is not evidence.\n\nNote what gets recorded: **the decisions not to act.** \"Considered, not chased,\nbecause they replied yesterday\" is a row. A silent gap in the log looks\nidentical to nobody bothering, and that is the difference between an activity\nlog and something a supervisory body will accept.\n\nA status field tells you where you are. An audit trail tells you how you got\nthere. Only the second one survives an inspection.\n\n**Four nodes are greyed out** - nothing sends, closes or records until you\nswitch them on.",
+        "height": 360,
+        "width": 470,
+        "color": 6
+      },
+      "id": "e8000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "e8000000-0000-4000-8000-000000000004",
+      "name": "Every Weekday Morning",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1880,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Onboarding",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000005",
+      "name": "Onboarding Tracker",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1660,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "outstanding",
+              "type": "string",
+              "value": "={{ [[\"a signed engagement letter\", $json.engagement_letter], [\"photo ID\", $json.photo_id], [\"proof of address\", $json.proof_of_address], [\"your company details\", $json.company_details], [\"your previous accountant's details\", $json.previous_accountant]].filter(i => !i[1]).map(i => i[0]).join(', ') }}"
+            },
+            {
+              "id": "a2",
+              "name": "outstanding_count",
+              "type": "number",
+              "value": "={{ [[\"a signed engagement letter\", $json.engagement_letter], [\"photo ID\", $json.photo_id], [\"proof of address\", $json.proof_of_address], [\"your company details\", $json.company_details], [\"your previous accountant's details\", $json.previous_accountant]].filter(i => !i[1]).length }}"
+            },
+            {
+              "id": "a3",
+              "name": "received",
+              "type": "string",
+              "value": "={{ [[\"a signed engagement letter\", $json.engagement_letter], [\"photo ID\", $json.photo_id], [\"proof of address\", $json.proof_of_address], [\"your company details\", $json.company_details], [\"your previous accountant's details\", $json.previous_accountant]].filter(i => i[1]).map(i => i[0]).join(', ') }}"
+            },
+            {
+              "id": "a4",
+              "name": "days_since_request",
+              "type": "number",
+              "value": "={{ Math.round(DateTime.fromISO('2026-09-02').diff(DateTime.fromISO($json.requested_on), 'days').days) }}"
+            },
+            {
+              "id": "a5",
+              "name": "days_since_last_chase",
+              "type": "number",
+              "value": "={{ ($json.last_chased_on ? Math.round(DateTime.fromISO('2026-09-02').diff(DateTime.fromISO($json.last_chased_on), 'days').days) : 9999) }}"
+            },
+            {
+              "id": "a6",
+              "name": "days_since_reply",
+              "type": "number",
+              "value": "={{ ($json.last_reply_on ? Math.round(DateTime.fromISO('2026-09-02').diff(DateTime.fromISO($json.last_reply_on), 'days').days) : 9999) }}"
+            },
+            {
+              "id": "a7",
+              "name": "chase_number",
+              "type": "number",
+              "value": "={{ $json.chase_count + 1 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000006",
+      "name": "Work Out Where Each One Stands",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1440,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "todays_decision",
+              "type": "string",
+              "value": "={{\n  $json.outstanding_count === 0                                    ? 'Everything is in'\n  : $json.days_since_reply <= 1                                    ? 'They replied yesterday'\n  : ($json.chase_count >= 3 && $json.days_since_last_chase >= 3) ? 'Three nudges and no answer'\n  : $json.days_since_last_chase < 3                               ? 'Too soon since the last nudge'\n  : $json.days_since_request < 3                                  ? 'Only just asked'\n  :                                                                  'Time for a nudge'\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000007",
+      "name": "What Does the Policy Say?",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1220,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d1",
+                    "leftValue": "={{ $json.todays_decision }}",
+                    "rightValue": "Everything is in",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Everything is in"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d2",
+                    "leftValue": "={{ $json.todays_decision }}",
+                    "rightValue": "They replied yesterday",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "They replied yesterday"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d3",
+                    "leftValue": "={{ $json.todays_decision }}",
+                    "rightValue": "Three nudges and no answer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Three nudges and no answer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d4",
+                    "leftValue": "={{ $json.todays_decision }}",
+                    "rightValue": "Too soon since the last nudge",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Too soon since the last nudge"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d5",
+                    "leftValue": "={{ $json.todays_decision }}",
+                    "rightValue": "Only just asked",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Only just asked"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Time for a nudge"
+        }
+      },
+      "id": "e8000000-0000-4000-8000-000000000008",
+      "name": "What Happens Today?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1000,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Onboarding",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "client_id"
+          ],
+          "value": {
+            "client_id": "={{ $json.client_id }}",
+            "status": "Complete - ready for partner sign-off",
+            "completed_on": "2026-09-02"
+          }
+        },
+        "options": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000009",
+      "name": "Close the File",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -740,
+        -140
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "e8000000-0000-4000-8000-000000000010",
+      "name": "Nothing to Do Today",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "e8000000-0000-4000-8000-000000000011",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -700,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write one short reminder email to a client of Ashcombe & Partners who\nstill owes us onboarding paperwork.\n\ncontact first name: {{ $json.contact_name.split(' ')[0] }}\nstill outstanding: {{ $json.outstanding }}\nalready received: {{ $json.received }}\nthis is reminder number: {{ $json.chase_number }}\ndays since we first asked: {{ $json.days_since_request }}\nupload link: https://portal.ashcombe.example/upload/{{ $json.client_id }}\nsign off as: {{ $json.account_owner }}\n\nRules:\n- Name every outstanding item, exactly as listed above. Never ask for anything already received,\n  and open by thanking them for what has come in when the list is not empty.\n- Reminder 1 is light. Reminder 2 notes the delay plainly. Reminder 3 explains the real reason\n  we keep asking: we are required to complete client due diligence before any work can begin on\n  their affairs, so nothing can move forward until the documents are with us. That is a fact,\n  not a threat - write it as one.\n- Never invent a deadline, a fee, a penalty or a consequence that was not agreed.\n- Offer one easy next step: the upload link, and an invitation to say if something is holding\n  it up.\n- Under 120 words. No exclamation marks, no chasing language like \"urgent\" or \"final notice\".\n  Write the way a practice writes to a client it wants to keep.\n- Return the body only, with no subject line.",
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "e8000000-0000-4000-8000-000000000012",
+      "name": "Write the Reminder",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -740,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('What Does the Policy Say?').item.json.contact_email }}",
+        "subject": "=Outstanding paperwork for your {{ $('What Does the Policy Say?').item.json.client_name }} onboarding",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000013",
+      "name": "Send the Reminder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        120
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "onboarding",
+          "mode": "name"
+        },
+        "text": "=*Automatic chasing has stopped* - {{ $json.client_name }} ({{ $json.client_id }})\n{{ $json.chase_count }} reminders sent, {{ $json.days_since_request }} days since we first asked, nothing received.\nStill outstanding: {{ $json.outstanding }}\n*{{ $json.account_owner }}* - this one needs a phone call.",
+        "otherOptions": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000014",
+      "name": "Hand It to the Account Owner",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -740,
+        620
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Evidence Trail",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Client": "={{ $('What Does the Policy Say?').item.json.client_name }}",
+            "Reference": "={{ $('What Does the Policy Say?').item.json.client_id }}",
+            "Decision": "={{ $('What Does the Policy Say?').item.json.todays_decision }}",
+            "Detail": "={{ $('What Does the Policy Say?').item.json.todays_decision === 'Time for a nudge' ? ('Reminder ' + $('What Does the Policy Say?').item.json.chase_number + ' sent to ' + $('What Does the Policy Say?').item.json.contact_email) : $('What Does the Policy Say?').item.json.todays_decision === 'Everything is in' ? 'All five items received. File closed for partner sign-off.' : $('What Does the Policy Say?').item.json.todays_decision === 'Three nudges and no answer' ? ('Chasing stopped after ' + $('What Does the Policy Say?').item.json.chase_count + ' reminders. Passed to ' + $('What Does the Policy Say?').item.json.account_owner) : ('Considered and not chased: ' + $('What Does the Policy Say?').item.json.todays_decision.toLowerCase()) }}",
+            "Still Outstanding": "={{ $('What Does the Policy Say?').item.json.outstanding || 'nothing' }}",
+            "Days Since Request": "={{ $('What Does the Policy Say?').item.json.days_since_request }}",
+            "Reminders Sent": "={{ $('What Does the Policy Say?').item.json.chase_count }}",
+            "Decided By": "={{ $('What Does the Policy Say?').item.json.todays_decision === 'Three nudges and no answer' ? ('Rule, then handed to ' + $('What Does the Policy Say?').item.json.account_owner) : 'Automatic - onboarding chase rule' }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e8000000-0000-4000-8000-000000000015",
+      "name": "Record What Happened",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -220,
+        120
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Every Weekday Morning": {
+      "main": [
+        [
+          {
+            "node": "Onboarding Tracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Onboarding Tracker": {
+      "main": [
+        [
+          {
+            "node": "Work Out Where Each One Stands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Work Out Where Each One Stands": {
+      "main": [
+        [
+          {
+            "node": "What Does the Policy Say?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Does the Policy Say?": {
+      "main": [
+        [
+          {
+            "node": "What Happens Today?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "What Happens Today?": {
+      "main": [
+        [
+          {
+            "node": "Close the File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing to Do Today",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hand It to the Account Owner",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing to Do Today",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing to Do Today",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write the Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write the Reminder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Reminder": {
+      "main": [
+        [
+          {
+            "node": "Send the Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close the File": {
+      "main": [
+        [
+          {
+            "node": "Record What Happened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nothing to Do Today": {
+      "main": [
+        [
+          {
+            "node": "Record What Happened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hand It to the Account Owner": {
+      "main": [
+        [
+          {
+            "node": "Record What Happened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the Reminder": {
+      "main": [
+        [
+          {
+            "node": "Record What Happened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Onboarding Tracker": [
+      {
+        "json": {
+          "client_id": "ON-01",
+          "client_name": "Harefield Joinery Ltd",
+          "contact_name": "Owen Harefield",
+          "contact_email": "owen@harefieldjoinery.example",
+          "account_owner": "Rhian Talbot",
+          "requested_on": "2026-08-31",
+          "engagement_letter": true,
+          "photo_id": true,
+          "proof_of_address": true,
+          "company_details": true,
+          "previous_accountant": true,
+          "last_chased_on": "",
+          "chase_count": 0,
+          "last_reply_on": "2026-09-01"
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-02",
+          "client_name": "Tessa Brandt Consulting",
+          "contact_name": "Tessa Brandt",
+          "contact_email": "tessa@brandtconsulting.example",
+          "account_owner": "Rhian Talbot",
+          "requested_on": "2026-08-29",
+          "engagement_letter": true,
+          "photo_id": false,
+          "proof_of_address": false,
+          "company_details": true,
+          "previous_accountant": true,
+          "last_chased_on": "",
+          "chase_count": 0,
+          "last_reply_on": ""
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-03",
+          "client_name": "Cavendish Rowe Ltd",
+          "contact_name": "Priti Cavendish",
+          "contact_email": "p.cavendish@cavendishrowe.example",
+          "account_owner": "Marcus Ojo",
+          "requested_on": "2026-08-25",
+          "engagement_letter": true,
+          "photo_id": false,
+          "proof_of_address": false,
+          "company_details": false,
+          "previous_accountant": false,
+          "last_chased_on": "2026-08-29",
+          "chase_count": 2,
+          "last_reply_on": ""
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-04",
+          "client_name": "Bramley & Fox",
+          "contact_name": "Alex Bramley",
+          "contact_email": "alex@bramleyfox.example",
+          "account_owner": "Marcus Ojo",
+          "requested_on": "2026-08-17",
+          "engagement_letter": false,
+          "photo_id": false,
+          "proof_of_address": false,
+          "company_details": false,
+          "previous_accountant": false,
+          "last_chased_on": "2026-08-29",
+          "chase_count": 3,
+          "last_reply_on": ""
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-05",
+          "client_name": "Nyala Freight Ltd",
+          "contact_name": "Selam Nyala",
+          "contact_email": "selam@nyalafreight.example",
+          "account_owner": "Rhian Talbot",
+          "requested_on": "2026-08-27",
+          "engagement_letter": true,
+          "photo_id": true,
+          "proof_of_address": false,
+          "company_details": false,
+          "previous_accountant": false,
+          "last_chased_on": "2026-09-01",
+          "chase_count": 1,
+          "last_reply_on": ""
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-06",
+          "client_name": "Orrell Design Studio",
+          "contact_name": "Jun Orrell",
+          "contact_email": "jun@orrelldesign.example",
+          "account_owner": "Marcus Ojo",
+          "requested_on": "2026-09-01",
+          "engagement_letter": false,
+          "photo_id": false,
+          "proof_of_address": false,
+          "company_details": false,
+          "previous_accountant": false,
+          "last_chased_on": "",
+          "chase_count": 0,
+          "last_reply_on": ""
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-07",
+          "client_name": "Pemberton Hall Ltd",
+          "contact_name": "Grace Pemberton",
+          "contact_email": "grace@pembertonhall.example",
+          "account_owner": "Rhian Talbot",
+          "requested_on": "2026-08-26",
+          "engagement_letter": true,
+          "photo_id": true,
+          "proof_of_address": false,
+          "company_details": false,
+          "previous_accountant": false,
+          "last_chased_on": "2026-08-28",
+          "chase_count": 1,
+          "last_reply_on": "2026-09-01"
+        }
+      },
+      {
+        "json": {
+          "client_id": "ON-08",
+          "client_name": "Willowbrook Care Ltd",
+          "contact_name": "Dominic Aleku",
+          "contact_email": "d.aleku@willowbrookcare.example",
+          "account_owner": "Marcus Ojo",
+          "requested_on": "2026-08-24",
+          "engagement_letter": true,
+          "photo_id": true,
+          "proof_of_address": true,
+          "company_details": true,
+          "previous_accountant": false,
+          "last_chased_on": "2026-08-28",
+          "chase_count": 1,
+          "last_reply_on": ""
+        }
+      }
+    ],
+    "Write the Reminder": [
+      {
+        "json": {
+          "text": "Hi Tessa,\n\nThank you for the signed engagement letter and the company details - both received.\n\nTo finish setting you up we still need two things: photo ID, and proof of address. You can upload both here: https://portal.ashcombe.example/upload/ON-02\n\nOnce those are in we can get started properly.\n\nBest,\nRhian Talbot\nAshcombe & Partners"
+        }
+      },
+      {
+        "json": {
+          "text": "Hi Priti,\n\nFollowing up again on the paperwork for your onboarding. We still need four things: photo ID, proof of address, your company details, and your previous accountant's details.\n\nI should be clear about why I keep asking. We are required to complete our client due diligence checks before we can begin any work on your affairs, so nothing can move forward until these are with us. It has been just over a fortnight since we first asked.\n\nEverything can go here: https://portal.ashcombe.example/upload/ON-03\n\nIf something is holding it up, tell me and I will see what we can do.\n\nBest,\nMarcus Ojo\nAshcombe & Partners"
+        }
+      },
+      {
+        "json": {
+          "text": "Hi Dominic,\n\nAlmost there - we have your engagement letter, ID, proof of address and company details.\n\nThe last thing outstanding is your previous accountant's details, so we can write for professional clearance. Their firm name and email address is all we need.\n\nYou can add it here: https://portal.ashcombe.example/upload/ON-08\n\nBest,\nMarcus Ojo\nAshcombe & Partners"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

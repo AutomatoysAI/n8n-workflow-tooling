@@ -1,0 +1,115 @@
+{
+  "consultancy": {
+    "name": "Harbourline Consulting",
+    "owner": "Dana Okafor",
+    "email": "dana@harbourline.example",
+    "review_channel": "client-ops"
+  },
+  "today": "2026-08-31",
+  "clients": [
+    {
+      "client_id": "CLI-001",
+      "name": "Ridgeline Foods",
+      "contact_name": "Kate Brennan",
+      "contact_email": "kate.brennan@ridgelinefoods.example",
+      "trello_board": "Ridgeline - Positioning Refresh",
+      "sow_title": "Brand Positioning Refresh",
+      "sow_signed": "2026-07-14",
+      "sow_scope": "Competitive audit of six named category rivals. Up to eight customer interviews, recorded and summarised. One positioning statement and a supporting messaging framework. One round of revisions on each deliverable. A 90-minute internal rollout workshop with the Ridgeline team.",
+      "sow_excludes": "Visual identity, packaging, and any design production. Advertising creative or media buying. Any market outside the United States. Ongoing retained advisory after the rollout workshop."
+    },
+    {
+      "client_id": "CLI-002",
+      "name": "Halcyon Dental Group",
+      "contact_name": "Priya Raman",
+      "contact_email": "priya.raman@halcyondental.example",
+      "trello_board": "Halcyon - Website Phase 1",
+      "sow_title": "Website Redesign, Phase 1",
+      "sow_signed": "2026-08-03",
+      "sow_scope": "Redesign of the homepage and three interior pages, including the key conversion elements on each. Copy editing of the existing text supplied by the client. Two rounds of revisions. Handoff files and a written spec for the client's own developer.",
+      "sow_excludes": "Development and implementation of any kind. Integration with third-party systems. New photography. Copy written from scratch. Hosting, maintenance, or anything after handoff."
+    }
+  ],
+  "meetings": [
+    {
+      "meeting_id": "MTG-001",
+      "client_id": "CLI-001",
+      "title": "Ridgeline - positioning check-in",
+      "date": "2026-08-27",
+      "notes": "Attendees: Dana (Harbourline), Kate Brennan (Ridgeline), Tom Alvarez (Ridgeline).\n\nKate opened by saying the interview transcripts have been genuinely useful and the team has landed on the everyday-provisions direction rather than premium pantry. Good - that was the harder of the two to argue for.\n\nWalked through the draft positioning statement line by line. Tom felt the second paragraph was still too abstract to hand to the sales team. Agreed I would tighten it and send the revised version across by Friday.\n\nKate is going to pull the 2025 sales data broken out by channel. She said Wednesday. The segmentation work cannot really move until that lands.\n\nTom asked whether we could also take on the packaging redesign for the new line launching in Q1, since we will already have the positioning in our heads by then. I said I would come back to him on it.\n\nWe talked for a few minutes about whether Canada is worth looking at eventually. Nothing decided, just thinking out loud.\n\nNext call: 3 September."
+    },
+    {
+      "meeting_id": "MTG-002",
+      "client_id": "CLI-002",
+      "title": "Halcyon - homepage concepts review",
+      "date": "2026-08-28",
+      "notes": "Attendees: Dana (Harbourline), Priya Raman (Halcyon), Dr Simone Ferrara (Halcyon).\n\nReviewed the two homepage directions. Priya prefers direction B and wants the new-patient path much more prominent above the fold. Dr Ferrara agreed.\n\nI will send both concepts over with direction B developed further, on Tuesday.\n\nDr Ferrara asked to add a patient booking widget to the homepage so people can book without phoning the practice. They run Dentrix. Priya asked whether that was part of the redesign or a separate thing - I said I would check the agreement and confirm either way.\n\nPriya will send the updated staff photos by Monday so we can drop them into the concepts.\n\nAlso noted in passing: the copy on the Services page is out of date in a few places. We will pick that up when we get to the interior pages."
+    }
+  ],
+  "demo_hint": {
+    "MTG-001": [
+      {
+        "what": "Send the revised positioning statement with a tighter second paragraph",
+        "owner": "us",
+        "owner_name": "Dana",
+        "due_date": "2026-08-28",
+        "quote": "Agreed I would tighten it and send the revised version across by Friday.",
+        "verdict": "in_scope",
+        "sow_clause": "One positioning statement and a supporting messaging framework. One round of revisions on each deliverable.",
+        "reason": "A revision to the positioning statement, which the agreement covers, and this is the first round."
+      },
+      {
+        "what": "Pull the 2025 sales data broken out by channel",
+        "owner": "client",
+        "owner_name": "Kate Brennan",
+        "due_date": "2026-09-02",
+        "quote": "Kate is going to pull the 2025 sales data broken out by channel. She said Wednesday.",
+        "verdict": "in_scope",
+        "sow_clause": "One positioning statement and a supporting messaging framework.",
+        "reason": "A client-side input the messaging work depends on. Not billable work, but it blocks us, so it belongs on the board."
+      },
+      {
+        "what": "Packaging redesign for the new line launching in Q1",
+        "owner": "us",
+        "owner_name": "Dana",
+        "due_date": "",
+        "quote": "Tom asked whether we could also take on the packaging redesign for the new line launching in Q1, since we will already have the positioning in our heads by then.",
+        "verdict": "out_of_scope",
+        "sow_clause": "EXCLUDES: Visual identity, packaging, and any design production.",
+        "reason": "The agreement excludes packaging and design production by name. This is a new engagement, not a task."
+      }
+    ],
+    "MTG-002": [
+      {
+        "what": "Send both homepage concepts with direction B developed further",
+        "owner": "us",
+        "owner_name": "Dana",
+        "due_date": "2026-09-01",
+        "quote": "I will send both concepts over with direction B developed further, on Tuesday.",
+        "verdict": "in_scope",
+        "sow_clause": "Redesign of the homepage and three interior pages, including the key conversion elements on each. Two rounds of revisions.",
+        "reason": "Homepage concepts are the core deliverable and this sits inside the two revision rounds."
+      },
+      {
+        "what": "Add a patient booking widget to the homepage, connected to Dentrix",
+        "owner": "us",
+        "owner_name": "Dana",
+        "due_date": "",
+        "quote": "Dr Ferrara asked to add a patient booking widget to the homepage so people can book without phoning the practice. They run Dentrix.",
+        "verdict": "unclear",
+        "sow_clause": "INCLUDES key conversion elements on each page. EXCLUDES development and implementation of any kind, and integration with third-party systems.",
+        "reason": "A booking widget is a conversion element, which is in scope, but wiring it to Dentrix is third-party integration, which is excluded by name. Designing the widget and building it have different answers and the agreement does not separate them."
+      },
+      {
+        "what": "Send the updated staff photos",
+        "owner": "client",
+        "owner_name": "Priya Raman",
+        "due_date": "2026-08-31",
+        "quote": "Priya will send the updated staff photos by Monday so we can drop them into the concepts.",
+        "verdict": "in_scope",
+        "sow_clause": "EXCLUDES new photography.",
+        "reason": "The exclusion covers us shooting new photography. The client supplying their own existing photos is a client-side input, and the concepts are blocked without it."
+      }
+    ]
+  }
+}

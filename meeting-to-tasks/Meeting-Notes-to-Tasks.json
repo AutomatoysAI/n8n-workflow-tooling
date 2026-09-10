@@ -1,0 +1,847 @@
+{
+  "name": "Meeting Notes to Tasks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nMeeting notes go in. Every commitment somebody actually made comes out,\nchecked line by line against that client's signed agreement.\n\n**In the agreement** becomes a Trello card. **Outside it** becomes a drafted\nchange-order email instead of unpaid work. **Genuinely ambiguous** goes to you,\nbecause guessing is the one thing this must not do.\n\nTwo meetings in. Six commitments found, two passing remarks correctly ignored.",
+        "height": 300,
+        "width": 460,
+        "color": 4
+      },
+      "id": "e6000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1580,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The one that pays for the system\n\nIn the Ridgeline notes, Tom asks whether Harbourline can \"also take on the\npackaging redesign\".\n\nOn a call that gets a *\"sure, let me look at it\"*. Three weeks later it is\nfifteen hours of unbilled design work and an awkward conversation.\n\nThe agreement excludes **\"visual identity, packaging, and any design\nproduction\"** by name. The system quotes that clause back, and drafts the\nnote the same afternoon - while it is still an easy conversation.\n\n**Scope creep is not caught by discipline. It is caught the same day or\nnot at all.**",
+        "height": 340,
+        "width": 480,
+        "color": 3
+      },
+      "id": "e6000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1080,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Why four nodes are greyed out\n\n`Create the Trello Card`, `Draft the Email to the Client`,\n`Flag It for the Consultant` and `Log Every Commitment` are **disabled on\npurpose**.\n\nNothing here writes to a board, an inbox or a spreadsheet until you connect\nthe account and switch the node on. You can run the whole thing, read every\nverdict, and change your mind - with no trace left in a client's system.\n\nThe three sources and the three AI steps have **pinned data**, so it runs\nwith no accounts connected at all. Unpin a node to make it call out for real.",
+        "height": 300,
+        "width": 440,
+        "color": 6
+      },
+      "id": "e6000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e6000000-0000-4000-8000-000000000004",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1560,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "YOUR_GOOGLE_DOC_ID_HERE",
+        "simple": true
+      },
+      "id": "e6000000-0000-4000-8000-000000000005",
+      "name": "Meeting Notes (Google Docs)",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        -50
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Scopes of Work",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000006",
+      "name": "Signed Scopes of Work",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1360,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "client_id",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000007",
+      "name": "Attach the Scope for That Client",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1140,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "e6000000-0000-4000-8000-000000000008",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -600,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=You are reading the notes from a client meeting. Pull out every commitment\nsomebody actually made.\n\nA commitment has an owner, and usually a time. \"I will send X by Friday\" is a commitment.\n\"We should look at Canada eventually\" is not - nobody agreed to anything. An idea raised\nand left open is not a commitment, and neither is an observation. Leaving those out is\npart of the job: a list that includes every passing remark gets ignored within a week.\n\nowner is \"us\" when Harbourline Consulting owes it, and \"client\" when the client owes it.\nowner_name is the person's name as written in the notes.\ndue_date: resolve what was said against the meeting date below and return YYYY-MM-DD.\nLeave it empty if no time was given. Never invent one.\nquote: copy the sentence it came from word for word. Do not tidy it up.\n\nMEETING: {{ $json.title }} ({{ $json.date }})\nCLIENT: {{ $json.name }}\n\nNOTES:\n{{ $json.notes }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"commitments\": [\n    {\n      \"what\": \"Send the revised positioning statement\",\n      \"owner\": \"us\",\n      \"owner_name\": \"Dana\",\n      \"due_date\": \"2026-08-28\",\n      \"quote\": \"Agreed I would tighten it and send the revised version across by Friday.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000009",
+      "name": "Pull Out the Commitments",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -920,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.commitments",
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000010",
+      "name": "One Item per Commitment",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "client_name",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.name }}"
+            },
+            {
+              "id": "p2",
+              "name": "sow_title",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.sow_title }}"
+            },
+            {
+              "id": "p3",
+              "name": "sow_scope",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.sow_scope }}"
+            },
+            {
+              "id": "p4",
+              "name": "sow_excludes",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.sow_excludes }}"
+            },
+            {
+              "id": "p5",
+              "name": "contact_name",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.contact_name }}"
+            },
+            {
+              "id": "p6",
+              "name": "contact_email",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.contact_email }}"
+            },
+            {
+              "id": "p7",
+              "name": "trello_board",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.trello_board }}"
+            },
+            {
+              "id": "p8",
+              "name": "meeting_title",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.title }}"
+            },
+            {
+              "id": "p9",
+              "name": "meeting_date",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.date }}"
+            },
+            {
+              "id": "p10",
+              "name": "meeting_id",
+              "type": "string",
+              "value": "={{ $('Attach the Scope for That Client').item.json.meeting_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000011",
+      "name": "Line It Up Against the Scope",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=Decide whether one commitment falls inside a signed agreement.\n\nverdict must be exactly one of: in_scope, out_of_scope, unclear\n\n- in_scope: the agreement covers it. Something the CLIENT owes is in_scope when it is an\n  input the covered work depends on - it is not billable, but it blocks us, so it belongs\n  on the board.\n- out_of_scope: the agreement excludes it by name, or it is plainly new work the agreement\n  never contemplated.\n- unclear: it could honestly be read either way, or it is partly covered and partly\n  excluded. Use this. Saying so is far more useful than a confident guess, because a wrong\n  in_scope costs unpaid work and a wrong out_of_scope is an awkward email to a client.\n\nsow_clause: quote the words from the agreement below that decide it, exactly as written.\nreason: one or two plain sentences. No hedging, no restating the question.\n\nAGREEMENT: {{ $json.sow_title }}\nIN SCOPE: {{ $json.sow_scope }}\nEXCLUDED: {{ $json.sow_excludes }}\n\nCOMMITMENT: {{ $json.what }}\nOWED BY: {{ $json.owner === 'us' ? 'Harbourline Consulting' : $json.owner_name + ' (the client)' }}\nFROM THE NOTES: \"{{ $json.quote }}\"",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"verdict\": \"in_scope\",\n  \"sow_clause\": \"One positioning statement and a supporting messaging framework.\",\n  \"reason\": \"A revision to the positioning statement, which the agreement covers.\"\n}",
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000012",
+      "name": "Check It Against the Scope",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "v1",
+                    "leftValue": "={{ $json.output.verdict }}",
+                    "rightValue": "in_scope",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "In the signed scope"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "v2",
+                    "leftValue": "={{ $json.output.verdict }}",
+                    "rightValue": "out_of_scope",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Outside the signed scope"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "v3",
+                    "leftValue": "={{ $json.output.verdict }}",
+                    "rightValue": "unclear",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Could be read both ways"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Anything else - a person looks at it"
+        }
+      },
+      "id": "e6000000-0000-4000-8000-000000000013",
+      "name": "In Scope, or Not?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -40,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "card",
+        "listId": "YOUR_TRELLO_LIST_ID_HERE",
+        "name": "={{ $('Line It Up Against the Scope').item.json.what }}",
+        "description": "=**Owner:** {{ $('Line It Up Against the Scope').item.json.owner === 'us' ? 'Harbourline Consulting' : $('Line It Up Against the Scope').item.json.owner_name + ' (client) - we are blocked until this lands' }}\n**From:** {{ $('Line It Up Against the Scope').item.json.meeting_title }} ({{ $('Line It Up Against the Scope').item.json.meeting_date }})\n\n> {{ $('Line It Up Against the Scope').item.json.quote }}\n\n**Covered by:** {{ $json.output.sow_clause }}\n{{ $json.output.reason }}",
+        "additionalFields": {
+          "due": "={{ $('Line It Up Against the Scope').item.json.due_date }}T17:00:00"
+        }
+      },
+      "id": "e6000000-0000-4000-8000-000000000014",
+      "name": "Create the Trello Card",
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -140
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short note to a client about something they asked for that is not\ncovered by the signed agreement.\n\nclient contact: {{ $('Line It Up Against the Scope').item.json.contact_name }}\nwhat they asked for: {{ $('Line It Up Against the Scope').item.json.what }}\nwhat they said: \"{{ $('Line It Up Against the Scope').item.json.quote }}\"\nthe agreement: {{ $('Line It Up Against the Scope').item.json.sow_title }}\nthe clause it falls outside: {{ $json.output.sow_clause }}\nwhy: {{ $json.output.reason }}\n\nRules:\n- You want the work. This is a scoping note, not a refusal, and it should not read as one.\n- Name the specific thing, and say plainly that it sits outside the current agreement.\n- Never state a price, a rate, a number of hours, or a delivery date. You do not know them,\n  and a number invented here is a number you will be held to.\n- Offer one next step: a short call, or a separate estimate.\n- Under 120 words. No apologising, no \"just\", no exclamation marks.\n- Sign off as Dana Okafor, Harbourline Consulting.\n- Return the body only, with no subject line.",
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "e6000000-0000-4000-8000-000000000015",
+      "name": "Write the Change-Order Note",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Following up on one thing from {{ $('Line It Up Against the Scope').item.json.meeting_title }}",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {
+          "sendTo": "={{ $('Line It Up Against the Scope').item.json.contact_email }}"
+        }
+      },
+      "id": "e6000000-0000-4000-8000-000000000016",
+      "name": "Draft the Email to the Client",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        80
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "client-ops",
+          "mode": "name"
+        },
+        "text": "=*Scope call needed* - {{ $('Line It Up Against the Scope').item.json.client_name }}\n> {{ $('Line It Up Against the Scope').item.json.what }}\n{{ $json.output.reason }}\n_{{ $('Line It Up Against the Scope').item.json.meeting_title }}, {{ $('Line It Up Against the Scope').item.json.meeting_date }}_",
+        "otherOptions": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000017",
+      "name": "Flag It for the Consultant",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        320
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Commitments",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Commitment"
+          ],
+          "value": {
+            "Client": "={{ $('Line It Up Against the Scope').item.json.client_name }}",
+            "Meeting": "={{ $('Line It Up Against the Scope').item.json.meeting_title }} ({{ $('Line It Up Against the Scope').item.json.meeting_date }})",
+            "Commitment": "={{ $('Line It Up Against the Scope').item.json.what }}",
+            "Owner": "={{ $('Line It Up Against the Scope').item.json.owner }}",
+            "Due": "={{ $('Line It Up Against the Scope').item.json.due_date }}",
+            "Verdict": "={{ $('In Scope, or Not?').item.json.output.verdict }}",
+            "Clause": "={{ $('In Scope, or Not?').item.json.output.sow_clause }}",
+            "Reason": "={{ $('In Scope, or Not?').item.json.output.reason }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e6000000-0000-4000-8000-000000000018",
+      "name": "Log Every Commitment",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        760,
+        60
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Meeting Notes (Google Docs)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Signed Scopes of Work",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meeting Notes (Google Docs)": {
+      "main": [
+        [
+          {
+            "node": "Attach the Scope for That Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signed Scopes of Work": {
+      "main": [
+        [
+          {
+            "node": "Attach the Scope for That Client",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Attach the Scope for That Client": {
+      "main": [
+        [
+          {
+            "node": "Pull Out the Commitments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Out the Commitments": {
+      "main": [
+        [
+          {
+            "node": "One Item per Commitment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One Item per Commitment": {
+      "main": [
+        [
+          {
+            "node": "Line It Up Against the Scope",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Line It Up Against the Scope": {
+      "main": [
+        [
+          {
+            "node": "Check It Against the Scope",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check It Against the Scope": {
+      "main": [
+        [
+          {
+            "node": "In Scope, or Not?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In Scope, or Not?": {
+      "main": [
+        [
+          {
+            "node": "Create the Trello Card",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write the Change-Order Note",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag It for the Consultant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag It for the Consultant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Change-Order Note": {
+      "main": [
+        [
+          {
+            "node": "Draft the Email to the Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create the Trello Card": {
+      "main": [
+        [
+          {
+            "node": "Log Every Commitment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft the Email to the Client": {
+      "main": [
+        [
+          {
+            "node": "Log Every Commitment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag It for the Consultant": {
+      "main": [
+        [
+          {
+            "node": "Log Every Commitment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Pull Out the Commitments",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Check It Against the Scope",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Write the Change-Order Note",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Meeting Notes (Google Docs)": [
+      {
+        "json": {
+          "meeting_id": "MTG-001",
+          "client_id": "CLI-001",
+          "title": "Ridgeline - positioning check-in",
+          "date": "2026-08-27",
+          "notes": "Attendees: Dana (Harbourline), Kate Brennan (Ridgeline), Tom Alvarez (Ridgeline).\n\nKate opened by saying the interview transcripts have been genuinely useful and the team has landed on the everyday-provisions direction rather than premium pantry. Good - that was the harder of the two to argue for.\n\nWalked through the draft positioning statement line by line. Tom felt the second paragraph was still too abstract to hand to the sales team. Agreed I would tighten it and send the revised version across by Friday.\n\nKate is going to pull the 2025 sales data broken out by channel. She said Wednesday. The segmentation work cannot really move until that lands.\n\nTom asked whether we could also take on the packaging redesign for the new line launching in Q1, since we will already have the positioning in our heads by then. I said I would come back to him on it.\n\nWe talked for a few minutes about whether Canada is worth looking at eventually. Nothing decided, just thinking out loud.\n\nNext call: 3 September."
+        }
+      },
+      {
+        "json": {
+          "meeting_id": "MTG-002",
+          "client_id": "CLI-002",
+          "title": "Halcyon - homepage concepts review",
+          "date": "2026-08-28",
+          "notes": "Attendees: Dana (Harbourline), Priya Raman (Halcyon), Dr Simone Ferrara (Halcyon).\n\nReviewed the two homepage directions. Priya prefers direction B and wants the new-patient path much more prominent above the fold. Dr Ferrara agreed.\n\nI will send both concepts over with direction B developed further, on Tuesday.\n\nDr Ferrara asked to add a patient booking widget to the homepage so people can book without phoning the practice. They run Dentrix. Priya asked whether that was part of the redesign or a separate thing - I said I would check the agreement and confirm either way.\n\nPriya will send the updated staff photos by Monday so we can drop them into the concepts.\n\nAlso noted in passing: the copy on the Services page is out of date in a few places. We will pick that up when we get to the interior pages."
+        }
+      }
+    ],
+    "Signed Scopes of Work": [
+      {
+        "json": {
+          "client_id": "CLI-001",
+          "name": "Ridgeline Foods",
+          "contact_name": "Kate Brennan",
+          "contact_email": "kate.brennan@ridgelinefoods.example",
+          "trello_board": "Ridgeline - Positioning Refresh",
+          "sow_title": "Brand Positioning Refresh",
+          "sow_signed": "2026-07-14",
+          "sow_scope": "Competitive audit of six named category rivals. Up to eight customer interviews, recorded and summarised. One positioning statement and a supporting messaging framework. One round of revisions on each deliverable. A 90-minute internal rollout workshop with the Ridgeline team.",
+          "sow_excludes": "Visual identity, packaging, and any design production. Advertising creative or media buying. Any market outside the United States. Ongoing retained advisory after the rollout workshop."
+        }
+      },
+      {
+        "json": {
+          "client_id": "CLI-002",
+          "name": "Halcyon Dental Group",
+          "contact_name": "Priya Raman",
+          "contact_email": "priya.raman@halcyondental.example",
+          "trello_board": "Halcyon - Website Phase 1",
+          "sow_title": "Website Redesign, Phase 1",
+          "sow_signed": "2026-08-03",
+          "sow_scope": "Redesign of the homepage and three interior pages, including the key conversion elements on each. Copy editing of the existing text supplied by the client. Two rounds of revisions. Handoff files and a written spec for the client's own developer.",
+          "sow_excludes": "Development and implementation of any kind. Integration with third-party systems. New photography. Copy written from scratch. Hosting, maintenance, or anything after handoff."
+        }
+      }
+    ],
+    "Pull Out the Commitments": [
+      {
+        "json": {
+          "output": {
+            "commitments": [
+              {
+                "what": "Send the revised positioning statement with a tighter second paragraph",
+                "owner": "us",
+                "owner_name": "Dana",
+                "due_date": "2026-08-28",
+                "quote": "Agreed I would tighten it and send the revised version across by Friday."
+              },
+              {
+                "what": "Pull the 2025 sales data broken out by channel",
+                "owner": "client",
+                "owner_name": "Kate Brennan",
+                "due_date": "2026-09-02",
+                "quote": "Kate is going to pull the 2025 sales data broken out by channel. She said Wednesday."
+              },
+              {
+                "what": "Packaging redesign for the new line launching in Q1",
+                "owner": "us",
+                "owner_name": "Dana",
+                "due_date": "",
+                "quote": "Tom asked whether we could also take on the packaging redesign for the new line launching in Q1, since we will already have the positioning in our heads by then."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "commitments": [
+              {
+                "what": "Send both homepage concepts with direction B developed further",
+                "owner": "us",
+                "owner_name": "Dana",
+                "due_date": "2026-09-01",
+                "quote": "I will send both concepts over with direction B developed further, on Tuesday."
+              },
+              {
+                "what": "Add a patient booking widget to the homepage, connected to Dentrix",
+                "owner": "us",
+                "owner_name": "Dana",
+                "due_date": "",
+                "quote": "Dr Ferrara asked to add a patient booking widget to the homepage so people can book without phoning the practice. They run Dentrix."
+              },
+              {
+                "what": "Send the updated staff photos",
+                "owner": "client",
+                "owner_name": "Priya Raman",
+                "due_date": "2026-08-31",
+                "quote": "Priya will send the updated staff photos by Monday so we can drop them into the concepts."
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "Check It Against the Scope": [
+      {
+        "json": {
+          "output": {
+            "verdict": "in_scope",
+            "sow_clause": "One positioning statement and a supporting messaging framework. One round of revisions on each deliverable.",
+            "reason": "A revision to the positioning statement, which the agreement covers, and this is the first round."
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "verdict": "in_scope",
+            "sow_clause": "One positioning statement and a supporting messaging framework.",
+            "reason": "A client-side input the messaging work depends on. Not billable work, but it blocks us, so it belongs on the board."
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "verdict": "out_of_scope",
+            "sow_clause": "EXCLUDES: Visual identity, packaging, and any design production.",
+            "reason": "The agreement excludes packaging and design production by name. This is a new engagement, not a task."
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "verdict": "in_scope",
+            "sow_clause": "Redesign of the homepage and three interior pages, including the key conversion elements on each. Two rounds of revisions.",
+            "reason": "Homepage concepts are the core deliverable and this sits inside the two revision rounds."
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "verdict": "unclear",
+            "sow_clause": "INCLUDES key conversion elements on each page. EXCLUDES development and implementation of any kind, and integration with third-party systems.",
+            "reason": "A booking widget is a conversion element, which is in scope, but wiring it to Dentrix is third-party integration, which is excluded by name. Designing the widget and building it have different answers and the agreement does not separate them."
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "verdict": "in_scope",
+            "sow_clause": "EXCLUDES new photography.",
+            "reason": "The exclusion covers us shooting new photography. The client supplying their own existing photos is a client-side input, and the concepts are blocked without it."
+          }
+        }
+      }
+    ],
+    "Write the Change-Order Note": [
+      {
+        "json": {
+          "text": "Hi Kate,\n\nOne thing to flag from Thursday. Tom asked whether we could take on the packaging redesign for the Q1 line. We would like to - it is the natural next step once the positioning lands, and we would be starting from a running start.\n\nIt does sit outside our current agreement, though. That one covers positioning and messaging, and specifically excludes packaging and design production, so it needs to be set up as its own piece of work rather than folded into this one.\n\nHappy to put together an outline and an estimate, or to talk it through on a call next week if that is easier. Whichever you prefer.\n\nDana\nHarbourline Consulting"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

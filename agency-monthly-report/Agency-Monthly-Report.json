@@ -1,0 +1,1059 @@
+{
+  "name": "Agency Monthly Report",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nRuns on the 3rd of the month. Takes one client at a time, pulls that client's\nSEO and paid channels together, works out every comparison **with arithmetic**,\nand only then asks a model to write the commentary.\n\n**Two clients are pinned here, and they end differently.**\n\nNorthbridge Dental has a complete month and gets a written report drafted for\nthe account manager to approve.\n\nHalloran Legal does not. Its LinkedIn Ads row came back with every single figure\nat zero - after spending $3,240 the month before. **Nothing is written for them\nand nothing is published**, because that is a broken connector, not a bad month.\n\nOne workflow, every client. The roster sheet is the only thing that changes.",
+        "height": 380,
+        "width": 460,
+        "color": 4
+      },
+      "id": "a7000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2380,
+        -700
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The zero that is not a zero\n\nThis is the failure that makes automated reporting dangerous, and it is why the\ncheck sits where it does.\n\n**When an ad platform connection breaks, it does not return an error. It returns\nzeros.** A revoked token, an expired refresh, a client who removed agency\naccess, a rename inside Business Manager - all of them come back as a clean,\nwell-formed month in which nothing happened.\n\nZero spend, zero impressions, zero conversions is indistinguishable from a\ngenuinely terrible month, and a model handed that row will write a fluent,\nconfident paragraph about a 100% decline. That paragraph goes to the client. The\nclient asks what happened. Nobody knows, because nobody was watching the pipe.\n\n**So the rule is arithmetic, not judgement: a channel that spent money last\nmonth and reports exactly nothing this month is treated as broken until a person\nsays otherwise.** No report. No update to the client-facing numbers. A message\nto whoever owns the account.\n\nIt costs one IF node, and it is the difference between a reporting system that\nruns unattended and one that only *looks* like it does.",
+        "height": 440,
+        "width": 500,
+        "color": 3
+      },
+      "id": "a7000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1880,
+        -700
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Two versions, and only one of them uses AI\n\nThe client asked for a full monthly report with written insights, plus a\nmetrics-only version they can look at any time during the month.\n\n**The metrics-only version never touches a model.** It is a sheet that\nrefreshes - one row per channel, the same numbers the arithmetic already\nagreed. It costs nothing per view, there is no draft to approve, and it cannot\nsay anything the figures do not already say.\n\n**The full version is the one with the commentary**, and it is drafted for the\naccount manager rather than sent. A human approves anything that reaches a\nclient.\n\n## Why the commentary is specific rather than generic\n\nThe model is never asked to find the trend. **Every comparison is computed\nbefore it is handed over** - month on month, against the same month last year,\nagainst target, cost per conversion then and now - and the channels arrive\n*already sorted with the biggest mover first*.\n\nGive a model raw figures and you get \"traffic increased, which is positive.\"\nGive it \"bookings down 30.9% on flat spend, cost per booking up from $32.06 to\n$45.53\" and the sentence writes itself. The prompt then forbids it from\ncalculating anything new or naming a channel that is not in the table.\n\n**Everything that sends or writes is greyed out.** It runs end to end and leaves\nnothing behind.",
+        "height": 480,
+        "width": 520,
+        "color": 6
+      },
+      "id": "a7000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1340,
+        -700
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 3 * *"
+            }
+          ]
+        }
+      },
+      "id": "a7000000-0000-4000-8000-000000000004",
+      "name": "Monthly, on the 3rd",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2360,
+        60
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a7000000-0000-4000-8000-000000000005",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2360,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ROSTER_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Clients",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000006",
+      "name": "Client Roster",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2140,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000007",
+      "name": "One Client at a Time",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1920,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_PORTER_EXPORT_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Monthly by channel",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000008",
+      "name": "Ad Channels (via Porter)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1700,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://searchconsole.googleapis.com/webmasters/v3/sites/YOUR_SITE/searchAnalytics/query",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"startDate\": \"{{ $now.minus({ months: 1 }).startOf('month').toISODate() }}\",\n  \"endDate\": \"{{ $now.minus({ months: 1 }).endOf('month').toISODate() }}\",\n  \"dimensions\": [\"date\"]\n}",
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000009",
+      "name": "SEO (Search Console)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2,
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000010",
+      "name": "All Channels Together",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1480,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.client }}",
+              "rightValue": "={{ $('One Client at a Time').first().json.client }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000011",
+      "name": "Just This Client",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -1260,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "conversions_mom_pct",
+              "type": "number",
+              "value": "={{ $json.conversions_prev > 0 ? Math.round((($json.conversions - $json.conversions_prev) / $json.conversions_prev) * 1000) / 10 : 0 }}"
+            },
+            {
+              "id": "a2",
+              "name": "conversions_yoy_pct",
+              "type": "number",
+              "value": "={{ $json.conversions_last_year > 0 ? Math.round((($json.conversions - $json.conversions_last_year) / $json.conversions_last_year) * 1000) / 10 : 0 }}"
+            },
+            {
+              "id": "a3",
+              "name": "spend_mom_pct",
+              "type": "number",
+              "value": "={{ $json.spend_prev > 0 ? Math.round((($json.spend - $json.spend_prev) / $json.spend_prev) * 1000) / 10 : 0 }}"
+            },
+            {
+              "id": "a4",
+              "name": "vs_target_pct",
+              "type": "number",
+              "value": "={{ $json.target_conversions > 0 ? Math.round((($json.conversions - $json.target_conversions) / $json.target_conversions) * 1000) / 10 : 0 }}"
+            },
+            {
+              "id": "a5",
+              "name": "cpa",
+              "type": "number",
+              "value": "={{ Math.round((($json.spend > 0 && $json.conversions > 0 ? $json.spend / $json.conversions : 0)) * 100) / 100 }}"
+            },
+            {
+              "id": "a6",
+              "name": "cpa_prev",
+              "type": "number",
+              "value": "={{ Math.round((($json.spend_prev > 0 && $json.conversions_prev > 0 ? $json.spend_prev / $json.conversions_prev : 0)) * 100) / 100 }}"
+            },
+            {
+              "id": "a7",
+              "name": "cpa_change_pct",
+              "type": "number",
+              "value": "={{ (($json.spend_prev > 0 && $json.conversions_prev > 0 ? $json.spend_prev / $json.conversions_prev : 0)) > 0 ? Math.round((((($json.spend > 0 && $json.conversions > 0 ? $json.spend / $json.conversions : 0)) - (($json.spend_prev > 0 && $json.conversions_prev > 0 ? $json.spend_prev / $json.conversions_prev : 0))) / (($json.spend_prev > 0 && $json.conversions_prev > 0 ? $json.spend_prev / $json.conversions_prev : 0))) * 1000) / 10 : 0 }}"
+            },
+            {
+              "id": "a8",
+              "name": "ctr",
+              "type": "number",
+              "value": "={{ $json.impressions > 0 ? Math.round(($json.clicks / $json.impressions) * 10000) / 100 : 0 }}"
+            },
+            {
+              "id": "a9",
+              "name": "ctr_prev",
+              "type": "number",
+              "value": "={{ $json.impressions_prev > 0 ? Math.round(($json.clicks_prev / $json.impressions_prev) * 10000) / 100 : 0 }}"
+            },
+            {
+              "id": "a10",
+              "name": "looks_broken",
+              "type": "boolean",
+              "value": "={{ $json.spend_prev > 0 && $json.spend == 0 && $json.impressions == 0 }}"
+            },
+            {
+              "id": "a11",
+              "name": "movement",
+              "type": "number",
+              "value": "={{ Math.abs($json.conversions_prev > 0 ? Math.round((($json.conversions - $json.conversions_prev) / $json.conversions_prev) * 1000) / 10 : 0) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000012",
+      "name": "Work Out the Comparisons",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1040,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "movement",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000013",
+      "name": "Biggest Movers First",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "channels",
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000014",
+      "name": "Bundle Into One Report",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "client",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.client }}"
+            },
+            {
+              "id": "a2",
+              "name": "client_name",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.client_name }}"
+            },
+            {
+              "id": "a3",
+              "name": "goal",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.goal }}"
+            },
+            {
+              "id": "a4",
+              "name": "conversion_name",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.conversion_name }}"
+            },
+            {
+              "id": "a5",
+              "name": "reader",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.reader }}"
+            },
+            {
+              "id": "a6",
+              "name": "currency",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.currency }}"
+            },
+            {
+              "id": "a7",
+              "name": "channels_not_run",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.channels_not_run }}"
+            },
+            {
+              "id": "a8",
+              "name": "manager_email",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.manager_email }}"
+            },
+            {
+              "id": "a9",
+              "name": "account_manager",
+              "type": "string",
+              "value": "={{ $('One Client at a Time').first().json.account_manager }}"
+            },
+            {
+              "id": "a10",
+              "name": "month_label",
+              "type": "string",
+              "value": "August 2026"
+            },
+            {
+              "id": "a11",
+              "name": "numbers_table",
+              "type": "string",
+              "value": "={{ $json.channels.map(c => c.channel + '  |  spend ' + c.spend + ' (last month ' + c.spend_prev + ', ' + c.spend_mom_pct + '%)' + '  |  ' + $('One Client at a Time').first().json.conversion_name + 's ' + c.conversions + ' (last month ' + c.conversions_prev + ', ' + c.conversions_mom_pct + '%)' + '  |  vs target ' + c.vs_target_pct + '%' + '  |  same month last year ' + c.conversions_last_year + ' (' + c.conversions_yoy_pct + '%)' + '  |  cost per ' + $('One Client at a Time').first().json.conversion_name + ' ' + c.cpa + ' (was ' + c.cpa_prev + ', ' + c.cpa_change_pct + '%)' + '  |  click-through ' + c.ctr + '% (was ' + c.ctr_prev + '%)').join('\\n') }}"
+            },
+            {
+              "id": "a12",
+              "name": "broken_channels",
+              "type": "string",
+              "value": "={{ $json.channels.filter(c => c.looks_broken).map(c => c.channel).join(', ') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000015",
+      "name": "Build the Numbers Table",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -380,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.broken_channels }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000016",
+      "name": "Every Channel Actually Reported?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "channels",
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000017",
+      "name": "Back to One Row per Channel",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        60,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_CLIENT_DASHBOARD_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Live metrics",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Client",
+            "Month",
+            "Channel"
+          ],
+          "value": {
+            "Client": "={{ $('Build the Numbers Table').first().json.client_name }}",
+            "Month": "August 2026",
+            "Channel": "={{ $json.channel }}",
+            "Spend": "={{ $json.spend }}",
+            "Impressions": "={{ $json.impressions }}",
+            "Clicks": "={{ $json.clicks }}",
+            "Click-through %": "={{ $json.ctr }}",
+            "Conversions": "={{ $json.conversions }}",
+            "vs last month %": "={{ $json.conversions_mom_pct }}",
+            "vs last year %": "={{ $json.conversions_yoy_pct }}",
+            "vs target %": "={{ $json.vs_target_pct }}",
+            "Cost per conversion": "={{ $json.cpa }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000018",
+      "name": "Metrics-Only Report (No AI)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        280,
+        -60
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 900
+        }
+      },
+      "id": "a7000000-0000-4000-8000-000000000019",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        60,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You write the monthly performance commentary for {{ $json.client_name }}, a client of Amire.\n\nWhat they are paying for: {{ $json.goal }}. One conversion here is one {{ $json.conversion_name }}.\nReporting month: {{ $json.month_label }}. All money is in {{ $json.currency }}.\nWho reads this: their {{ $json.reader }}.\n\nTHE NUMBERS - already checked, already compared, and sorted with the biggest change first:\n\n{{ $json.numbers_table }}\n\nWrite four short paragraphs, no headings:\n\n1. What happened. Open with the channel at the top of the table - it moved most, so it is\n   the story. Say what changed and by how much, quoting the figure.\n2. The number that needs attention. Name the single worst one and say what it costs them in\n   ordinary terms. A rising cost per {{ $json.conversion_name }} means they are paying more\n   money for the same result.\n3. What is working. The best number, quoted the same way.\n4. What we are doing about it. One or two concrete next steps that follow from the numbers\n   above, not general advice.\n\nRules. These matter more than the writing:\n- Every number you write must already appear in the table above. Do not calculate anything\n  new, do not add channels together, do not convert currencies, do not round differently.\n- Only write about the channels in the table. If a channel is not listed, this client does\n  not run it, and mentioning it is an error.\n- No industry benchmarks, no averages, no \"typical for the sector\". You have not been given\n  any and you cannot know them.\n- Where the numbers do not tell you why something moved, say what to check instead of\n  guessing. \"Click-through fell while impressions rose, which usually points at creative\n  fatigue - worth checking when those ad sets last had new images\" is useful. \"This is\n  likely seasonal\" is not.\n- Plain English. The reader runs a business, not a marketing team. Any term that is not\n  ordinary English gets explained in the same sentence.\n- No greeting, no sign-off, no bullet points, no exclamation marks.\n\nReturn the commentary only.",
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "a7000000-0000-4000-8000-000000000020",
+      "name": "Write the Insights",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        60,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('Build the Numbers Table').first().json.channels_not_run.split(', ').filter(c => c.length > 0 && $json.text.includes(c)).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000021",
+      "name": "Only the Channels We Gave It?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        280,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Build the Numbers Table').first().json.client_name }} - August 2026 report",
+        "emailType": "text",
+        "message": "={{ $json.text }}\n\n---\n\n{{ $('Build the Numbers Table').first().json.numbers_table }}",
+        "options": {
+          "sendTo": "={{ $('Build the Numbers Table').first().json.manager_email }}"
+        }
+      },
+      "id": "a7000000-0000-4000-8000-000000000022",
+      "name": "Full Report - Draft for Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        500,
+        280
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "reporting-review",
+          "mode": "name"
+        },
+        "text": "=*No August 2026 report for {{ $('Build the Numbers Table').first().json.client_name }}*\n{{ $('Build the Numbers Table').first().json.broken_channels ? ('*' + $('Build the Numbers Table').first().json.broken_channels + '* spent money last month and reported nothing at all this month - zero spend, zero impressions. That is a broken connection until someone confirms otherwise, so no commentary was written and the client-facing numbers were not updated.') : ('The draft mentioned a channel this client does not run. Held rather than sent.') }}\nUsual causes: a revoked token, an expired refresh, or agency access removed inside the ad account.\n{{ $('Build the Numbers Table').first().json.account_manager }} - nothing has gone to the client.",
+        "otherOptions": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000023",
+      "name": "Held for a Person",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        500,
+        560
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ROSTER_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Report log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Month": "August 2026",
+            "Client": "={{ $('Build the Numbers Table').first().json.client_name }}",
+            "Outcome": "={{ $('Build the Numbers Table').first().json.broken_channels ? 'Held - channel reported nothing' : 'Drafted for approval' }}",
+            "Channels not reporting": "={{ $('Build the Numbers Table').first().json.broken_channels }}",
+            "Approver": "={{ $('Build the Numbers Table').first().json.account_manager }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a7000000-0000-4000-8000-000000000024",
+      "name": "Log Every Report",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        720,
+        420
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Monthly, on the 3rd": {
+      "main": [
+        [
+          {
+            "node": "Client Roster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Client Roster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Client Roster": {
+      "main": [
+        [
+          {
+            "node": "One Client at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One Client at a Time": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Ad Channels (via Porter)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SEO (Search Console)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ad Channels (via Porter)": {
+      "main": [
+        [
+          {
+            "node": "All Channels Together",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO (Search Console)": {
+      "main": [
+        [
+          {
+            "node": "All Channels Together",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "All Channels Together": {
+      "main": [
+        [
+          {
+            "node": "Just This Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Just This Client": {
+      "main": [
+        [
+          {
+            "node": "Work Out the Comparisons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Work Out the Comparisons": {
+      "main": [
+        [
+          {
+            "node": "Biggest Movers First",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Biggest Movers First": {
+      "main": [
+        [
+          {
+            "node": "Bundle Into One Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bundle Into One Report": {
+      "main": [
+        [
+          {
+            "node": "Build the Numbers Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build the Numbers Table": {
+      "main": [
+        [
+          {
+            "node": "Every Channel Actually Reported?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Channel Actually Reported?": {
+      "main": [
+        [
+          {
+            "node": "Back to One Row per Channel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Write the Insights",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Held for a Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Back to One Row per Channel": {
+      "main": [
+        [
+          {
+            "node": "Metrics-Only Report (No AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write the Insights",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Insights": {
+      "main": [
+        [
+          {
+            "node": "Only the Channels We Gave It?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only the Channels We Gave It?": {
+      "main": [
+        [
+          {
+            "node": "Full Report - Draft for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Held for a Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Full Report - Draft for Approval": {
+      "main": [
+        [
+          {
+            "node": "Log Every Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Held for a Person": {
+      "main": [
+        [
+          {
+            "node": "Log Every Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Every Report": {
+      "main": [
+        [
+          {
+            "node": "One Client at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Client Roster": [
+      {
+        "json": {
+          "client": "northbridge-dental",
+          "client_name": "Northbridge Dental",
+          "goal": "new patient bookings",
+          "conversion_name": "booking",
+          "reader": "practice owner",
+          "currency": "AUD",
+          "channels_run": "SEO, Google Ads, Facebook Ads",
+          "channels_not_run": "LinkedIn Ads",
+          "account_manager": "Priya Raman",
+          "manager_email": "priya@amire.example"
+        }
+      },
+      {
+        "json": {
+          "client": "halloran-legal",
+          "client_name": "Halloran Legal",
+          "goal": "qualified enquiries",
+          "conversion_name": "enquiry",
+          "reader": "managing partner",
+          "currency": "AUD",
+          "channels_run": "SEO, Google Ads, LinkedIn Ads",
+          "channels_not_run": "Facebook Ads",
+          "account_manager": "Priya Raman",
+          "manager_email": "priya@amire.example"
+        }
+      }
+    ],
+    "Ad Channels (via Porter)": [
+      {
+        "json": {
+          "client": "northbridge-dental",
+          "channel": "Google Ads",
+          "month": "2026-08",
+          "spend": 4820.0,
+          "impressions": 218400,
+          "clicks": 6310,
+          "conversions": 184,
+          "spend_prev": 4750.0,
+          "impressions_prev": 205100,
+          "clicks_prev": 5980,
+          "conversions_prev": 161,
+          "conversions_last_year": 142,
+          "target_conversions": 170
+        }
+      },
+      {
+        "json": {
+          "client": "northbridge-dental",
+          "channel": "Facebook Ads",
+          "month": "2026-08",
+          "spend": 2140.0,
+          "impressions": 412000,
+          "clicks": 3890,
+          "conversions": 47,
+          "spend_prev": 2180.0,
+          "impressions_prev": 398000,
+          "clicks_prev": 4210,
+          "conversions_prev": 68,
+          "conversions_last_year": 55,
+          "target_conversions": 60
+        }
+      },
+      {
+        "json": {
+          "client": "halloran-legal",
+          "channel": "Google Ads",
+          "month": "2026-08",
+          "spend": 3960.0,
+          "impressions": 74300,
+          "clicks": 2110,
+          "conversions": 31,
+          "spend_prev": 3880.0,
+          "impressions_prev": 71900,
+          "clicks_prev": 2040,
+          "conversions_prev": 29,
+          "conversions_last_year": 24,
+          "target_conversions": 30
+        }
+      },
+      {
+        "json": {
+          "client": "halloran-legal",
+          "channel": "LinkedIn Ads",
+          "month": "2026-08",
+          "spend": 0,
+          "impressions": 0,
+          "clicks": 0,
+          "conversions": 0,
+          "spend_prev": 3240.0,
+          "impressions_prev": 128000,
+          "clicks_prev": 940,
+          "conversions_prev": 22,
+          "conversions_last_year": 18,
+          "target_conversions": 20
+        }
+      }
+    ],
+    "SEO (Search Console)": [
+      {
+        "json": {
+          "client": "northbridge-dental",
+          "channel": "SEO",
+          "month": "2026-08",
+          "spend": 0,
+          "impressions": 96400,
+          "clicks": 4180,
+          "conversions": 61,
+          "spend_prev": 0,
+          "impressions_prev": 88200,
+          "clicks_prev": 3760,
+          "conversions_prev": 52,
+          "conversions_last_year": 38,
+          "target_conversions": 55
+        }
+      },
+      {
+        "json": {
+          "client": "halloran-legal",
+          "channel": "SEO",
+          "month": "2026-08",
+          "spend": 0,
+          "impressions": 41200,
+          "clicks": 1630,
+          "conversions": 24,
+          "spend_prev": 0,
+          "impressions_prev": 39800,
+          "clicks_prev": 1580,
+          "conversions_prev": 21,
+          "conversions_last_year": 16,
+          "target_conversions": 22
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

@@ -1,0 +1,112 @@
+{
+  "company": {
+    "name": "Larkspur Studio",
+    "what": "an eleven-person branding studio",
+    "answers_channel": "studio-questions",
+    "people_channel": "ask-a-human"
+  },
+  "handbook": [
+    {
+      "source": "Handbook 3.1 Leave",
+      "topic": "Holiday allowance and booking",
+      "policy": "25 days a year plus bank holidays, pro rata for part-time. Requests go in at least two weeks ahead through the HR system. Your account lead approves it. No more than two people from the same account team off at once."
+    },
+    {
+      "source": "Handbook 3.4 Working pattern",
+      "topic": "Remote and office days",
+      "policy": "Up to three days a week from home. Tuesday is a whole-studio day and everyone is in the office. Client presentation days are in the office whether or not they fall on a Tuesday."
+    },
+    {
+      "source": "Handbook 5.2 Expenses",
+      "topic": "Expenses and receipts",
+      "policy": "Anything under 50 pounds can go through without a receipt if you note what it was for. Above 50 pounds a receipt is required. Travel to a client meeting is always claimable. Client entertainment needs a director to approve it first, not after."
+    },
+    {
+      "source": "Handbook 6.1 Credit control",
+      "topic": "Late paying clients",
+      "policy": "Invoices are 30 days. Chase at 7 days overdue, again at 14, and escalate to a director at 30. Work stops at 45 days overdue, and only a director makes that call."
+    },
+    {
+      "source": "Handbook 7.4 Pricing and discounts",
+      "topic": "Discounts on retainers and projects",
+      "policy": "Nobody below director level agrees a discount, a rate change or a scope extension at no charge. The standard answer to a discount request is that we will look at scope instead. If a client presses, hand it to the account director the same day."
+    },
+    {
+      "source": "Handbook 2.3 New starters",
+      "topic": "Onboarding a new employee",
+      "policy": "Ops issues the laptop and accounts before day one. A buddy is assigned in week one. The thirty day review is booked by the account lead on the first day, not later."
+    }
+  ],
+  "clients": [
+    {
+      "client": "Ferndale Bakery",
+      "account_lead": "Amara Osei",
+      "arrangement": "Retainer, 2400 a month",
+      "renews": "2026-11-01",
+      "notes": "Two brand refreshes in eighteen months. Slow to approve, quick to pay."
+    },
+    {
+      "client": "Kestrel Bikes",
+      "account_lead": "Tom Vasquez",
+      "arrangement": "Retainer, 1800 a month",
+      "renews": "2026-09-30",
+      "notes": "Renewal conversation is open. Asked about pricing twice this quarter."
+    },
+    {
+      "client": "Halloway Interiors",
+      "account_lead": "Amara Osei",
+      "arrangement": "Project, fixed fee",
+      "renews": "",
+      "notes": "Phase two signed. No retainer discussion yet."
+    }
+  ],
+  "calendar": [
+    {
+      "when": "2026-09-03 10:00",
+      "what": "Kestrel Bikes renewal call",
+      "who": "Tom Vasquez, Priya Nandra"
+    },
+    {
+      "when": "2026-09-03 14:30",
+      "what": "Ferndale Bakery packaging review",
+      "who": "Amara Osei"
+    },
+    {
+      "when": "2026-09-08 09:30",
+      "what": "Studio day - everyone in",
+      "who": "All"
+    }
+  ],
+  "questions": [
+    {
+      "question_id": "Q-1",
+      "asked_by": "Priya Nandra",
+      "question": "How much holiday do I get, and how far ahead do I need to ask for it?",
+      "expected": "cited"
+    },
+    {
+      "question_id": "Q-2",
+      "asked_by": "Tom Vasquez",
+      "question": "Kestrel Bikes are asking for 15% off their retainer on the renewal call. Can I agree to that, and what are they on at the moment?",
+      "expected": "cited"
+    },
+    {
+      "question_id": "Q-3",
+      "asked_by": "Amara Osei",
+      "question": "What is our paternity leave policy?",
+      "expected": "does not know"
+    },
+    {
+      "question_id": "Q-4",
+      "asked_by": "Priya Nandra",
+      "question": "What is the standard notice period in the UK?",
+      "expected": "no source"
+    }
+  ],
+  "demo_answers": {
+    "Q-1": "25 days a year plus bank holidays, pro rata if you are part time. Put the request in at least two weeks ahead through the HR system and your account lead approves it. One thing to check before you book: no more than two people from the same account team can be off at the same time.\n\nSOURCE: Handbook 3.1 Leave",
+    "Q-2": "No, not on your own. Nobody below director level agrees a discount, a rate change or a free scope extension. The line to take on the call is that we will look at scope rather than price, and if they press, it goes to the account director the same day.\n\nKestrel Bikes are on a retainer at 1800 a month, renewing 2026-09-30, and you are the account lead.\n\nSOURCE: Handbook 7.4 Pricing and discounts, and the client record for Kestrel Bikes",
+    "Q-3": "I could not find anything about paternity leave in the handbook. The leave section covers holiday only. Ask a director or whoever looks after HR, and it would be worth adding once you have the answer.\n\nSOURCE: none",
+    "Q-4": "In the UK the statutory minimum notice from an employee is one week once you have been employed for a month or more, and employers give one week per year of service up to twelve. Most contracts set something longer, commonly a month for salaried staff."
+  }
+}

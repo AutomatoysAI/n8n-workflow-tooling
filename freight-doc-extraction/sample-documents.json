@@ -1,0 +1,109 @@
+{
+  "carrier": {
+    "name": "Kestrel Line Carriers LLC",
+    "review_channel": "load-desk",
+    "dispatcher": "Marisol Vega - Dispatch",
+    "money_tolerance": 0.01
+  },
+  "today": "2026-09-02",
+
+  "_note": "Five documents as they arrive from the load desk inbox, already turned into text. Two are clean rate confirmations and file themselves. Three stop: one has line items that do not add up to its own printed total, one is missing fields the scan cut off, and one is a proof of delivery that arrived where a rate confirmation was expected. expected_extraction is what a correct read of each document returns - it is there so the build script can check the deciding logic without an OpenAI key.",
+
+  "documents": [
+    {
+      "id": "DOC-1",
+      "filename": "meridian_rc_88214.pdf",
+      "received_at": "2026-09-01T08:14:00",
+      "from": "dispatch@meridianfreight.example",
+      "text": "MERIDIAN FREIGHT BROKERS INC\nMC# 812445   DOT# 2299871\n\nRATE CONFIRMATION - LOAD MFB-88214\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Joliet, IL 60432        DATE: 09/03/2026  0800-1400\nDELIVERY: Columbus, OH 43219      DATE: 09/04/2026  0700-1200\n\nEQUIPMENT: 53' Dry Van        WEIGHT: 38,400 lbs\nCOMMODITY: Packaged consumer goods\n\nCHARGES\n  Linehaul .................. 2,450.00\n  Fuel Surcharge ............   385.00\n  Accessorials ..............     0.00\n  ----------------------------------------\n  TOTAL RATE ................ 2,835.00 USD\n\nPAYMENT TERMS: Net 30 from receipt of signed POD.\nDetention billable after 2 hours, $50/hr, requires in/out times.",
+      "expected_extraction": {
+        "load_number": "MFB-88214",
+        "broker_name": "Meridian Freight Brokers Inc",
+        "broker_mc": "812445",
+        "pickup_date": "2026-09-03",
+        "delivery_date": "2026-09-04",
+        "linehaul": "2450.00",
+        "fuel_surcharge": "385.00",
+        "accessorials": "0.00",
+        "total_rate": "2835.00",
+        "all_quoted": true
+      },
+      "expected_lane": "file"
+    },
+    {
+      "id": "DOC-2",
+      "filename": "crosscontinental_rc_40917.pdf",
+      "received_at": "2026-09-01T09:02:00",
+      "from": "loads@crosscontinental.example",
+      "text": "CROSS CONTINENTAL LOGISTICS LLC\nMC# 651902\n\nRATE CONFIRMATION - LOAD CCL-40917\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Laredo, TX 78045         DATE: 09/04/2026  0600-1000\nDELIVERY: Atlanta, GA 30336        DATE: 09/06/2026  0800-1500\n\nEQUIPMENT: 53' Reefer  -  set 34F continuous\nWEIGHT: 41,900 lbs     COMMODITY: Produce\n\nCHARGES\n  Linehaul .................. 3,150.00\n  Fuel Surcharge ............   472.50\n  Lumper (receipt required) .   175.00\n  ----------------------------------------\n  TOTAL RATE ................ 3,779.50 USD\n\nPAYMENT TERMS: Net 21. Quick pay 2% available.\nTemperature records required with invoice.",
+      "expected_extraction": {
+        "load_number": "CCL-40917",
+        "broker_name": "Cross Continental Logistics LLC",
+        "broker_mc": "651902",
+        "pickup_date": "2026-09-04",
+        "delivery_date": "2026-09-06",
+        "linehaul": "3150.00",
+        "fuel_surcharge": "472.50",
+        "accessorials": "175.00",
+        "total_rate": "3779.50",
+        "all_quoted": true
+      },
+      "expected_lane": "review"
+    },
+    {
+      "id": "DOC-3",
+      "filename": "redline_rc_2291_scan.pdf",
+      "received_at": "2026-09-01T11:47:00",
+      "from": "ops@redlinetransport.example",
+      "text": "REDLINE TRANSPORT SOLUTIONS\n\nRATE CONFIRMATION - LOAD RTS-2291\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Fort Worth, TX 76106      DATE: 09/05/2026  1000-1600\nDELIVERY: Memphis, TN 38118        DATE:\n\nEQUIPMENT: 53' Dry Van        WEIGHT: 29,750 lbs\n\nCHARGES\n  Linehaul .................. 1,640.00\n  Fuel Surcharge ............   246.00\n  Accessorials ..............     0.00\n  ----------------------------------------\n  TOTAL RATE ................ 1,886.00 USD\n\nPAYMENT TERMS: Net 30.\n\n[remainder of page not captured - scan truncated]",
+      "expected_extraction": {
+        "load_number": "RTS-2291",
+        "broker_name": "Redline Transport Solutions",
+        "broker_mc": "",
+        "pickup_date": "2026-09-05",
+        "delivery_date": "",
+        "linehaul": "1640.00",
+        "fuel_surcharge": "246.00",
+        "accessorials": "0.00",
+        "total_rate": "1886.00",
+        "all_quoted": true
+      },
+      "expected_lane": "review"
+    },
+    {
+      "id": "DOC-4",
+      "filename": "pod_signed_88190.pdf",
+      "received_at": "2026-09-01T15:20:00",
+      "from": "driver.chidi@kestrelline.example",
+      "text": "PROOF OF DELIVERY / SIGNED BILL OF LADING\n\nBOL# 4471902        LOAD MFB-88190\nCONSIGNEE: Wexford Distribution, Columbus OH\n\nDELIVERED: 08/31/2026 at 10:42\nPIECES: 22 pallets        WEIGHT: 37,100 lbs\n\nCONDITION: Received in good order, no exceptions noted.\nRECEIVED BY: D. Okonkwo (print)   Signature on file\nDRIVER: C. Adeyemi\n\nNo detention. Trailer sealed on arrival, seal 88231 intact.",
+      "expected_extraction": null,
+      "expected_lane": "review"
+    },
+    {
+      "id": "DOC-5",
+      "filename": "anchorpoint_rc_7734.pdf",
+      "received_at": "2026-09-01T16:05:00",
+      "from": "brokerage@anchorpointlogistics.example",
+      "text": "ANCHOR POINT LOGISTICS\nMC# 447120   DOT# 1885430\n\nRATE CONFIRMATION - LOAD APL-7734\nCARRIER: Kestrel Line Carriers LLC\n\nPICKUP:   Kansas City, MO 64120     DATE: 09/07/2026  0900-1500\nDELIVERY: Denver, CO 80216         DATE: 09/08/2026  0800-1400\n\nEQUIPMENT: 53' Dry Van        WEIGHT: 24,300 lbs\nCOMMODITY: Paper products\n\nCHARGES\n  Linehaul .................. 1,875.00\n  Fuel Surcharge ............   281.25\n  Accessorials ..............     0.00\n  ----------------------------------------\n  TOTAL RATE ................ 2,156.25 USD\n\nPAYMENT TERMS: Net 30 from signed POD.",
+      "expected_extraction": {
+        "load_number": "APL-7734",
+        "broker_name": "Anchor Point Logistics",
+        "broker_mc": "447120",
+        "pickup_date": "2026-09-07",
+        "delivery_date": "2026-09-08",
+        "linehaul": "1875.00",
+        "fuel_surcharge": "281.25",
+        "accessorials": "0.00",
+        "total_rate": "2156.25",
+        "all_quoted": true
+      },
+      "expected_lane": "file"
+    }
+  ],
+
+  "expected_reasons": {
+    "DOC-2": "The charges add to $3,797.50 but the document says $3,779.50 - a $18.00 difference.",
+    "DOC-3": "Missing: Broker MC number, Delivery date.",
+    "DOC-4": "Not a rate confirmation."
+  }
+}

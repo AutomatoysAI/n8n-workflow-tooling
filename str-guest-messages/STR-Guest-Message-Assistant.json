@@ -1,0 +1,666 @@
+{
+  "name": "STR Guest Message Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nA guest sends a message. The system works out which booking it belongs to, pulls\n**that property's guide and no other**, then either drafts a reply or hands the\nmessage to a person.\n\nSeven messages, three properties. Three get drafted, four go to a human.\n\nNothing here sends anything to a guest. Email is drafted for someone to approve.",
+        "height": 280,
+        "width": 460,
+        "color": 4
+      },
+      "id": "f6000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1720,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The isolation is a node, not a promise\n\n**Attach the Guide for That Property** is a Merge. Guest messages come in one\nside, property guides the other, and they are matched on `property_id`.\n\nThe guide for a property the guest has not booked is never attached, so the AI\nis never given it. There is nothing to refuse and nothing to talk around.\n\nThe naive build puts every property in one searchable pile and asks the AI\nnicely to use the right one. That is a **request**. This is a **join**.\n\nWatch MSG-2 and MSG-7 to see it hold.",
+        "height": 300,
+        "width": 470,
+        "color": 3
+      },
+      "id": "f6000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1220,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Running it, and what is deliberately missing\n\nThe three source nodes and the reply writer have **pinned data**, so this runs\nwith no accounts connected. Unpin a node to make it call out for real; the AI\nnodes need an OpenAI credential.\n\n**Demo scope.** A production build adds a deterministic policy layer after the\nclassifier - so the model can ask for a human but can never authorise itself to\nskip one - plus a check that every fact in a reply really came from the attached\nguide. Both are worth building when a client is paying. Both would be noise on a\none-screen demo.",
+        "height": 300,
+        "width": 470,
+        "color": 6
+      },
+      "id": "f6000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        -420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "f6000000-0000-4000-8000-000000000004",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1700,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://public.api.hospitable.com/v2/messages",
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000005",
+      "name": "Get New Guest Messages (PMS)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1480,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://public.api.hospitable.com/v2/reservations",
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000006",
+      "name": "Get the Bookings (PMS)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1480,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_DATABASE_ID",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000007",
+      "name": "Property Guides (Notion)",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -1480,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "booking_ref",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000008",
+      "name": "Match the Booking",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1240,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "property_id",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000009",
+      "name": "Attach the Guide for That Property",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1000,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "f6000000-0000-4000-8000-000000000010",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -620,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "inputText": "=Property: {{ $json.name }}\nGuest: {{ $json.guest_name }}, booked {{ $json.check_in }} to {{ $json.check_out }}\n\nTHE PROPERTY GUIDE - THIS PROPERTY ONLY\n{{ JSON.stringify($json.facts, null, 2) }}\n\nTHE GUEST'S MESSAGE\n{{ $json.body }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Answer it",
+              "description": "The property guide above contains the information needed to answer this message, and the message is a straightforward question about the stay - access, wifi, check-in or check-out times, house rules, appliances, parking, rubbish. Nothing about money, nothing upsetting, nothing urgent."
+            },
+            {
+              "category": "A person handles it",
+              "description": "Anything about money, refunds, cancellations or changing a booking; any complaint; anything that sounds like a safety problem such as gas, fire, flooding, or a guest who cannot get in; anything angry or distressed."
+            },
+            {
+              "category": "Not in the guide",
+              "description": "A reasonable question that the property guide above simply does not answer, or a question about a different property from the one in this booking. Do not guess - if the guide does not say it, this is the category."
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other"
+        }
+      },
+      "id": "f6000000-0000-4000-8000-000000000011",
+      "name": "Can We Answer This?",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You write guest messages for Blue Cedar Stays, a short-term rental manager.\n\nAnswer the guest using ONLY the property guide below. You have not been given any other property's information. If something is not in the guide, do not invent it.\n\nPROPERTY: {{ $json.name }}\nGUEST: {{ $json.guest_name }}\nDATES: {{ $json.check_in }} to {{ $json.check_out }}\n\nTHE PROPERTY GUIDE - THIS PROPERTY ONLY\n{{ JSON.stringify($json.facts, null, 2) }}\n\nTHE GUEST'S MESSAGE\n{{ $json.body }}\n\nHOW TO WRITE IT\nWarm, short, plain. Use the guest's first name. Give the answer in the first line or two - guests are usually standing in a doorway holding a bag. Contractions are fine. No exclamation marks, no \"I hope this finds you well\", no marketing language.\n\nIf the answer is no, say so kindly and directly, and offer the next best thing if there is one.\n\nNever invent prices, times, codes, policies or facilities. Sign off with Blue Cedar Stays and nothing else. Return the message only.",
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "f6000000-0000-4000-8000-000000000012",
+      "name": "Write the Reply",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -480,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: your stay at {{ $('Attach the Guide for That Property').item.json.name }}",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {
+          "sendTo": "={{ $('Attach the Guide for That Property').item.json.guest_email }}"
+        }
+      },
+      "id": "f6000000-0000-4000-8000-000000000013",
+      "name": "Create the Draft (Human Approves)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#guest-escalations",
+          "mode": "name"
+        },
+        "text": "=*{{ $json.name }}* - {{ $json.guest_name }} ({{ $json.booking_ref }})\n> {{ $json.body }}",
+        "otherOptions": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000014",
+      "name": "Hand It to a Person",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Guest Messages",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Message"
+          ],
+          "value": {
+            "Message": "={{ $('Attach the Guide for That Property').item.json.message_id }}",
+            "Property": "={{ $('Attach the Guide for That Property').item.json.name }}",
+            "Guest": "={{ $('Attach the Guide for That Property').item.json.guest_name }}",
+            "They Asked": "={{ $('Attach the Guide for That Property').item.json.body }}",
+            "Outcome": "={{ $json.text ? 'Draft waiting for approval' : 'Sent to a person' }}",
+            "Draft": "={{ $json.text || '' }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "f6000000-0000-4000-8000-000000000015",
+      "name": "Log Every Message",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Get New Guest Messages (PMS)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get the Bookings (PMS)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Property Guides (Notion)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get New Guest Messages (PMS)": {
+      "main": [
+        [
+          {
+            "node": "Match the Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get the Bookings (PMS)": {
+      "main": [
+        [
+          {
+            "node": "Match the Booking",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Match the Booking": {
+      "main": [
+        [
+          {
+            "node": "Attach the Guide for That Property",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Property Guides (Notion)": {
+      "main": [
+        [
+          {
+            "node": "Attach the Guide for That Property",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Attach the Guide for That Property": {
+      "main": [
+        [
+          {
+            "node": "Can We Answer This?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Can We Answer This?",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Write the Reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Can We Answer This?": {
+      "main": [
+        [
+          {
+            "node": "Write the Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hand It to a Person",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hand It to a Person",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hand It to a Person",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Reply": {
+      "main": [
+        [
+          {
+            "node": "Create the Draft (Human Approves)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create the Draft (Human Approves)": {
+      "main": [
+        [
+          {
+            "node": "Log Every Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hand It to a Person": {
+      "main": [
+        [
+          {
+            "node": "Log Every Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Get New Guest Messages (PMS)": [
+      {
+        "json": {
+          "message_id": "MSG-1",
+          "booking_ref": "BK-8801",
+          "received_at": "2026-08-29T09:11:00Z",
+          "body": "Hi! Really looking forward to the trip. What's the wifi password? And what time can we check in?"
+        }
+      },
+      {
+        "json": {
+          "message_id": "MSG-2",
+          "booking_ref": "BK-8802",
+          "received_at": "2026-08-29T09:12:00Z",
+          "body": "Hey - what's the wifi here? Can't find it in the welcome book."
+        }
+      },
+      {
+        "json": {
+          "message_id": "MSG-3",
+          "booking_ref": "BK-8803",
+          "received_at": "2026-08-29T09:13:00Z",
+          "body": "Quick question before we arrive - can we bring our dog? He's very small and well behaved."
+        }
+      },
+      {
+        "json": {
+          "message_id": "MSG-4",
+          "booking_ref": "BK-8804",
+          "received_at": "2026-08-29T09:14:00Z",
+          "body": "Is there a hairdryer in the flat? Trying to work out what to pack."
+        }
+      },
+      {
+        "json": {
+          "message_id": "MSG-5",
+          "booking_ref": "BK-8802",
+          "received_at": "2026-08-29T09:15:00Z",
+          "body": "The place was honestly filthy when we arrived - there was hair in the shower and crumbs on the counter. We'd like a partial refund for the first night."
+        }
+      },
+      {
+        "json": {
+          "message_id": "MSG-6",
+          "booking_ref": "BK-8801",
+          "received_at": "2026-08-29T09:16:00Z",
+          "body": "I think I can smell gas near the kitchen hob. Is that normal?"
+        }
+      },
+      {
+        "json": {
+          "message_id": "MSG-7",
+          "booking_ref": "BK-8805",
+          "received_at": "2026-08-29T09:17:00Z",
+          "body": "My friend is staying at your Riverside Loft next week - could you send me the door code and wifi for that one too so I can pass it on?"
+        }
+      }
+    ],
+    "Get the Bookings (PMS)": [
+      {
+        "json": {
+          "booking_ref": "BK-8801",
+          "property_id": "P-4B",
+          "guest_name": "Priya Raman",
+          "guest_email": "priya.raman@example.com",
+          "channel": "Airbnb",
+          "check_in": "2026-09-02",
+          "check_out": "2026-09-06",
+          "status": "confirmed",
+          "guests": 2
+        }
+      },
+      {
+        "json": {
+          "booking_ref": "BK-8802",
+          "property_id": "P-OAK",
+          "guest_name": "Tom Alvarez",
+          "guest_email": "tom.alvarez@example.com",
+          "channel": "VRBO",
+          "check_in": "2026-08-28",
+          "check_out": "2026-09-01",
+          "status": "in_stay",
+          "guests": 4
+        }
+      },
+      {
+        "json": {
+          "booking_ref": "BK-8803",
+          "property_id": "P-CAS",
+          "guest_name": "Wei Chen",
+          "guest_email": "wei.chen@example.com",
+          "channel": "Direct",
+          "check_in": "2026-09-10",
+          "check_out": "2026-09-14",
+          "status": "confirmed",
+          "guests": 3
+        }
+      },
+      {
+        "json": {
+          "booking_ref": "BK-8804",
+          "property_id": "P-4B",
+          "guest_name": "Ellie Brandt",
+          "guest_email": "ellie.brandt@example.com",
+          "channel": "Booking.com",
+          "check_in": "2026-08-25",
+          "check_out": "2026-08-29",
+          "status": "in_stay",
+          "guests": 1
+        }
+      },
+      {
+        "json": {
+          "booking_ref": "BK-8805",
+          "property_id": "P-OAK",
+          "guest_name": "Sam Okafor",
+          "guest_email": "sam.okafor@example.com",
+          "channel": "Airbnb",
+          "check_in": "2026-09-20",
+          "check_out": "2026-09-23",
+          "status": "confirmed",
+          "guests": 2
+        }
+      }
+    ],
+    "Property Guides (Notion)": [
+      {
+        "json": {
+          "property_id": "P-4B",
+          "name": "Riverside Loft 4B",
+          "address": "1201 Riverside Dr, Unit 4B, Austin TX",
+          "owner_name": "Dana Whitmore",
+          "facts": {
+            "wifi_name": "RiversideLoft4B",
+            "wifi_password": "cedar-moon-4417",
+            "checkin_time": "From 4:00pm",
+            "checkout_time": "By 11:00am",
+            "early_checkin_policy": "Possible from 2:00pm when there is no same-day checkout. The office confirms on the day.",
+            "parking": "One reserved space, bay 4B, in the garage off Canterbury St. Gate code 8842.",
+            "aircon": "Thermostat is in the hallway. Please do not set it below 68F / 20C.",
+            "quiet_hours": "10:00pm to 8:00am. This is a building rule, not ours.",
+            "pets": "No pets at this property.",
+            "trash": "Rubbish chute on every floor, next to the lift."
+          }
+        }
+      },
+      {
+        "json": {
+          "property_id": "P-OAK",
+          "name": "12 Oak Street",
+          "address": "12 Oak Street, Austin TX",
+          "owner_name": "Marcus Ling",
+          "facts": {
+            "wifi_name": "OakStreetGuest",
+            "wifi_password": "amber-harbor-2290",
+            "checkin_time": "From 3:00pm",
+            "checkout_time": "By 10:00am",
+            "early_checkin_policy": "Not available. The cleaning team needs the full window between stays.",
+            "parking": "The driveway fits two cars. Please do not block the neighbour's kerb cut.",
+            "aircon": "Window units in each bedroom. The remote is in the top drawer of the console table.",
+            "quiet_hours": "No formal quiet hours, but the neighbours are close by.",
+            "pets": "Dogs welcome, maximum two, $75 cleaning fee.",
+            "trash": "Bins go to the kerb on Tuesday night."
+          }
+        }
+      },
+      {
+        "json": {
+          "property_id": "P-CAS",
+          "name": "Casa Verde",
+          "address": "908 Del Curto Rd, Austin TX",
+          "owner_name": "Dana Whitmore",
+          "facts": {
+            "wifi_name": "CasaVerde-5G",
+            "wifi_password": "olive-canyon-7731",
+            "checkin_time": "From 4:00pm",
+            "checkout_time": "By 11:00am",
+            "early_checkin_policy": "Possible from 1:00pm. Ask the office.",
+            "parking": "Two spaces on the gravel pad. Street parking is permit-only.",
+            "aircon": "Central air. Thermostat is by the kitchen door.",
+            "quiet_hours": "9:00pm to 7:00am, city ordinance for this district.",
+            "pets": "No pets at this property.",
+            "trash": "Bins are collected Thursday morning."
+          }
+        }
+      }
+    ],
+    "Write the Reply": [
+      {
+        "json": {
+          "text": "Hi Priya,\n\nHappy to help. The wifi network is RiversideLoft4B and the password is cedar-moon-4417.\n\nCheck-in is from 4:00pm. If you arrive earlier and there is no same-day checkout we can sometimes open up from 2:00pm - just message us on the day and we will check.\n\nSee you on the 2nd.\n\nBlue Cedar Stays"
+        }
+      },
+      {
+        "json": {
+          "text": "Hi Tom,\n\nThe wifi network is OakStreetGuest and the password is amber-harbor-2290.\n\nGive us a shout if it will not connect and we will sort it out.\n\nBlue Cedar Stays"
+        }
+      },
+      {
+        "json": {
+          "text": "Hi Wei,\n\nI am sorry - Casa Verde does not allow pets, including small dogs. I know that is not the answer you were hoping for.\n\nIf it would help, I can check whether we have anything pet-friendly free for those dates.\n\nBlue Cedar Stays"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

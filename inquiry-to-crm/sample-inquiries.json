@@ -1,0 +1,120 @@
+{
+  "company": {
+    "name": "Cedarline Supply",
+    "support_inbox": "support@cedarline.example",
+    "review_channel": "support-triage",
+    "orders_owner": "Nadia Cortez - Orders",
+    "support_owner": "Theo Mbeki - Support"
+  },
+  "today": "2026-09-01",
+  "customers": [
+    {
+      "customer_id": "C-1001",
+      "customer_name": "Jane Okonkwo",
+      "customer_email": "jane.okonkwo@brightwater.example",
+      "customer_phone": "+1 (555) 555-0142",
+      "customer_since": "2024-03-11",
+      "orders": ["ORD-88231"]
+    },
+    {
+      "customer_id": "C-1002",
+      "customer_name": "Daniel Okonkwo",
+      "customer_email": "d.okonkwo@brightwater.example",
+      "customer_phone": "(555) 555-0156",
+      "customer_since": "2025-01-27",
+      "orders": []
+    },
+    {
+      "customer_id": "C-1003",
+      "customer_name": "Marisol Vega",
+      "customer_email": "marisol@vegaflooring.example",
+      "customer_phone": "555.555.0177",
+      "customer_since": "2023-09-02",
+      "orders": ["ORD-88410"]
+    },
+    {
+      "customer_id": "C-1004",
+      "customer_name": "Ray Whitfield",
+      "customer_email": "info@northgate.example",
+      "customer_phone": "+1 555 555 0198",
+      "customer_since": "2025-06-14",
+      "orders": ["ORD-88502"]
+    }
+  ],
+  "emails": [
+    {
+      "inquiry_id": "INQ-01",
+      "id": "18f2a1",
+      "date": "2026-09-01T08:12:00",
+      "from": "marisol@vegaflooring.example",
+      "name": "Marisol Vega",
+      "phone": "",
+      "order_number": "ORD-88410",
+      "subject": "Order arrived damaged",
+      "text": "Two of the four boxes in order ORD-88410 arrived with the corners crushed and the boards inside are chipped. I can send photos. What do you need from me to get replacements out?"
+    },
+    {
+      "inquiry_id": "INQ-02",
+      "id": "18f2a2",
+      "date": "2026-09-01T08:41:00",
+      "from": "j.okonkwo@fastmail.example",
+      "name": "Jane",
+      "phone": "",
+      "order_number": "ORD-88231",
+      "subject": "Delivery date for ORD-88231",
+      "text": "Hi, writing from my personal address as I am away from the office. Could you tell me where order ORD-88231 has got to? It was supposed to land last Thursday and the site crew are waiting on it."
+    },
+    {
+      "inquiry_id": "INQ-04",
+      "id": "18f2a3",
+      "date": "2026-09-01T09:03:00",
+      "from": "info@northgate.example",
+      "name": "",
+      "phone": "",
+      "order_number": "",
+      "subject": "Question about a delivery",
+      "text": "Can someone let us know when the next delivery is scheduled? We have not had a confirmation email this month."
+    },
+    {
+      "inquiry_id": "INQ-06",
+      "id": "18f2a4",
+      "date": "2026-09-01T10:22:00",
+      "from": "kofi.mensah@stonebridge.example",
+      "name": "Kofi Mensah",
+      "phone": "",
+      "order_number": "ORD-8823",
+      "subject": "Wrong item in ORD-8823",
+      "text": "The pallet we received under order ORD-8823 has the wrong finish on it. We ordered matte and this is gloss. Can we arrange a collection?"
+    }
+  ],
+  "form_submissions": [
+    {
+      "inquiry_id": "INQ-03",
+      "submitted_at": "2026-09-01T08:55:00",
+      "full_name": "Dan Okonkwo",
+      "email_address": "dan.okonkwo88@mailbox.example",
+      "phone_number": "(555) 555-0156",
+      "order_reference": "",
+      "topic": "Returns",
+      "enquiry": "I need to return an unopened box from a delivery a couple of weeks ago. I do not have the order number to hand, sorry. The phone number here is the one on the account."
+    },
+    {
+      "inquiry_id": "INQ-05",
+      "submitted_at": "2026-09-01T11:07:00",
+      "full_name": "Hana Suzuki",
+      "email_address": "hana.suzuki@meridian.example",
+      "phone_number": "555-555-0233",
+      "order_reference": "",
+      "topic": "New enquiry",
+      "enquiry": "We are fitting out three units next spring and would like to talk about trade pricing on the oak range. Who is the right person to speak to?"
+    }
+  ],
+  "expected": {
+    "INQ-01": "confident",
+    "INQ-02": "confident",
+    "INQ-03": "possible",
+    "INQ-04": "possible",
+    "INQ-05": "no_match",
+    "INQ-06": "no_match"
+  }
+}

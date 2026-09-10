@@ -1,0 +1,825 @@
+{
+  "name": "Daily Ecom Briefing",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nRuns at 7am. Pulls yesterday from **three systems that do not agree with each\nother**, works out which number is the truth, and writes the CEO a short note in\nplain English.\n\nTwo days are pinned here. **One reconciles and sends. One does not, and is held\nfor a person instead** - because a briefing built on numbers nobody has checked\nis worse than no briefing.\n\nNo dashboard. The CEO does not want to log into anything at 7am; they want to\nknow whether yesterday was fine.",
+        "height": 320,
+        "width": 440,
+        "color": 4
+      },
+      "id": "c4000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1900,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Shopify and the books will never match\n\nThis is the part every dashboard project gets wrong, and it is the whole reason\nthis workflow exists.\n\nShopify says **$15,405**. QuickBooks says **$15,155**. Both are right.\n\nThe $250 difference is a **gift card**. Redeeming a gift card is not new\nrevenue - the money was already booked on the day the card was *sold*. Counting\nit again would be counting it twice. So the two systems disagree, and the\ndisagreement is **correct**.\n\nRefunds, tax, shipping, discounts and the timezone the day is cut on all do the\nsame thing. A CEO dashboard that shows three numbers for \"sales yesterday\" is\ndead inside a week, and no amount of AI on top of it fixes that.\n\n**So the system picks a number of record - the books - explains every dollar of\nthe difference, and refuses to publish anything it cannot explain.**\n\nThe second day is that refusal: a $1,560 gap with nothing to account for it.\nIt does not guess, and it does not quietly average. It asks Finance.",
+        "height": 460,
+        "width": 520,
+        "color": 3
+      },
+      "id": "c4000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1430,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Two things worth saying on the call\n\n**Meta's revenue number is a claim, not an accounting fact.** The platform is\nmarking its own homework - it counts a sale as its own if the buyer saw an ad\nwithin the attribution window, and Klaviyo will claim the same sale on the same\nday. Add every channel's attributed revenue together and you get more revenue\nthan the business actually made. So ROAS here is **blended**: real money in,\ndivided by real money out. Meta's figure is shown, and labelled as Meta's.\n\n**Everything that sends is greyed out** - the CEO email, the Finance alert, and\nthe history log. It runs end to end and leaves nothing behind.\n\n**The AI never sees an unreconciled number.** It writes about figures that have\nalready been agreed by the arithmetic upstream. That ordering is the design.",
+        "height": 400,
+        "width": 460,
+        "color": 6
+      },
+      "id": "c4000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -890,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "c4000000-0000-4000-8000-000000000004",
+      "name": "Every Morning at 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1880,
+        60
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c4000000-0000-4000-8000-000000000005",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1880,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "order",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "createdAtMin": "={{ $now.minus({ days: 1 }).toISODate() }}"
+        }
+      },
+      "id": "c4000000-0000-4000-8000-000000000006",
+      "name": "Shopify Orders",
+      "type": "n8n-nodes-base.shopify",
+      "typeVersion": 1,
+      "position": [
+        -1660,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://quickbooks.api.intuit.com/v3/company/YOUR_REALM_ID/reports/ProfitAndLoss",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "quickBooksOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "start_date",
+              "value": "={{ $now.minus({ days: 1 }).toISODate() }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $now.minus({ days: 1 }).toISODate() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000007",
+      "name": "Booked Revenue (QuickBooks)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1660,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "hostUrl": "graph.facebook.com",
+        "httpRequestMethod": "GET",
+        "graphApiVersion": "v21.0",
+        "node": "act_YOUR_AD_ACCOUNT_ID",
+        "edge": "insights",
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000008",
+      "name": "Meta Ads Spend",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -1660,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "total_price"
+            },
+            {
+              "aggregation": "sum",
+              "field": "refund_amount"
+            },
+            {
+              "aggregation": "sum",
+              "field": "tax"
+            },
+            {
+              "aggregation": "sum",
+              "field": "shipping"
+            },
+            {
+              "aggregation": "sum",
+              "field": "gift_card"
+            },
+            {
+              "aggregation": "count",
+              "field": "order_number"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "date",
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000009",
+      "name": "Total Up Shopify",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -1420,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "date",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000010",
+      "name": "Match the Books to Shopify",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "date",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000011",
+      "name": "Add the Ad Spend",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -980,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "orders",
+              "type": "number",
+              "value": "={{ $json.count_order_number }}"
+            },
+            {
+              "id": "a2",
+              "name": "gross_sales",
+              "type": "number",
+              "value": "={{ Math.round(($json.sum_total_price) * 100) / 100 }}"
+            },
+            {
+              "id": "a3",
+              "name": "refunds",
+              "type": "number",
+              "value": "={{ Math.round(($json.sum_refund_amount) * 100) / 100 }}"
+            },
+            {
+              "id": "a4",
+              "name": "shopify_net",
+              "type": "number",
+              "value": "={{ Math.round((($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping)) * 100) / 100 }}"
+            },
+            {
+              "id": "a5",
+              "name": "books_net",
+              "type": "number",
+              "value": "={{ Math.round(($json.booked_net_revenue) * 100) / 100 }}"
+            },
+            {
+              "id": "a6",
+              "name": "gap",
+              "type": "number",
+              "value": "={{ Math.round(((($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue)) * 100) / 100 }}"
+            },
+            {
+              "id": "a7",
+              "name": "explained_by_gift_cards",
+              "type": "number",
+              "value": "={{ Math.round(($json.sum_gift_card) * 100) / 100 }}"
+            },
+            {
+              "id": "a8",
+              "name": "unexplained",
+              "type": "number",
+              "value": "={{ Math.round((Math.abs((($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue) - $json.sum_gift_card)) * 100) / 100 }}"
+            },
+            {
+              "id": "a9",
+              "name": "unexplained_pct",
+              "type": "number",
+              "value": "={{ (Math.round((Math.abs((($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue) - $json.sum_gift_card) / ($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping)) * 1000) / 10) }}"
+            },
+            {
+              "id": "a10",
+              "name": "number_of_record",
+              "type": "number",
+              "value": "={{ Math.round(($json.booked_net_revenue) * 100) / 100 }}"
+            },
+            {
+              "id": "a11",
+              "name": "aov",
+              "type": "number",
+              "value": "={{ Math.round(($json.booked_net_revenue / $json.count_order_number) * 100) / 100 }}"
+            },
+            {
+              "id": "a12",
+              "name": "ad_spend",
+              "type": "number",
+              "value": "={{ Math.round(($json.spend) * 100) / 100 }}"
+            },
+            {
+              "id": "a13",
+              "name": "blended_roas",
+              "type": "number",
+              "value": "={{ Math.round(($json.booked_net_revenue / $json.spend) * 100) / 100 }}"
+            },
+            {
+              "id": "a14",
+              "name": "meta_claimed_revenue",
+              "type": "number",
+              "value": "={{ Math.round(($json.attributed_revenue) * 100) / 100 }}"
+            },
+            {
+              "id": "a15",
+              "name": "meta_claim_pct",
+              "type": "number",
+              "value": "={{ Math.round(($json.attributed_revenue / $json.booked_net_revenue) * 1000) / 10 }}"
+            },
+            {
+              "id": "a16",
+              "name": "reconciliation_note",
+              "type": "string",
+              "value": "={{ Math.abs((($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue) - $json.sum_gift_card) === 0 ? ('Shopify and the books differ by $' + (($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue) + ', which is exactly the gift cards redeemed. A redeemed gift card is not new revenue - it was booked when the card was sold.') : ('Shopify and the books differ by $' + (($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue) + '. Gift cards account for $' + $json.sum_gift_card + '. $' + Math.abs((($json.sum_total_price - $json.sum_refund_amount - $json.sum_tax - $json.sum_shipping) - $json.booked_net_revenue) - $json.sum_gift_card) + ' is unaccounted for.') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000012",
+      "name": "Reconcile the Numbers",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "g1",
+              "leftValue": "={{ $json.unexplained_pct }}",
+              "rightValue": 1.0,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000013",
+      "name": "Do the Numbers Agree?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -520,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.2,
+          "maxTokens": 500
+        }
+      },
+      "id": "c4000000-0000-4000-8000-000000000014",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write Renata Alvim, the CEO of Copperleaf Goods, a short morning note about yesterday's trading.\n\nDATE: {{ $json.date }}\nREVENUE (the number of record, from the books): ${{ $json.number_of_record }}\nORDERS: {{ $json.orders }}\nAVERAGE ORDER VALUE: ${{ $json.aov }}\nGROSS SALES IN SHOPIFY: ${{ $json.gross_sales }}\nREFUNDS: ${{ $json.refunds }}\nRECONCILIATION: {{ $json.reconciliation_note }}\nAD SPEND (Meta): ${{ $json.ad_spend }}\nBLENDED ROAS (revenue of record / ad spend): {{ $json.blended_roas }}\nMETA SAYS IT DROVE: ${{ $json.meta_claimed_revenue }} ({{ $json.meta_claim_pct }}% of revenue)\n\nRules:\n- **Revenue is the number of record and nothing else.** Never quote the Shopify gross as\n  revenue, and never add Meta's attributed figure to anything.\n- **Meta's number is a claim, not an accounting fact.** If you mention it, say whose claim\n  it is. The platform counts a sale as its own if the buyer saw an ad within its window,\n  and other channels claim the same sales, so these figures overlap and cannot be summed.\n- Mention the reconciliation in one sentence, in plain words. Renata is not an accountant\n  and should not have to be.\n- **Never state a fact that is not listed above.** No comparison to last week, last month\n  or target - you have not been given them, and an invented trend is worse than no trend.\n- No recommendations. This is a status note, not advice.\n- Four sentences or fewer. No greeting, no sign-off, no bullet points, no exclamation\n  marks. Plain sentences a person reads standing up.\n\nReturn the note only.",
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "c4000000-0000-4000-8000-000000000015",
+      "name": "Write the Briefing",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -280,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "renata@copperleafgoods.example",
+        "subject": "={{ 'Yesterday: $' + $('Reconcile the Numbers').item.json.number_of_record + ' across ' + $('Reconcile the Numbers').item.json.orders + ' orders' }}",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000016",
+      "name": "Email the CEO",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -40,
+        40
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "finance-alerts",
+          "mode": "name"
+        },
+        "text": "=*No briefing sent for {{ $json.date }}* - the numbers do not reconcile.\nShopify nets *${{ $json.shopify_net }}*, the books say *${{ $json.books_net }}*.\nGift cards explain ${{ $json.explained_by_gift_cards }}. *${{ $json.unexplained }} ({{ $json.unexplained_pct }}%) is unaccounted for*, against a 1.0% tolerance.\n{{ $json.orders }} orders. Usual suspects: a channel that has not settled, a failed sync, or a day cut on a different timezone.\n<@Ade Balogun - Finance> - nothing has gone to Renata.",
+        "otherOptions": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000017",
+      "name": "Hold It and Ask Finance",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -40,
+        320
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Daily",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $('Reconcile the Numbers').item.json.date }}",
+            "Revenue (books)": "={{ $('Reconcile the Numbers').item.json.number_of_record }}",
+            "Shopify net": "={{ $('Reconcile the Numbers').item.json.shopify_net }}",
+            "Unexplained": "={{ $('Reconcile the Numbers').item.json.unexplained }}",
+            "Orders": "={{ $('Reconcile the Numbers').item.json.orders }}",
+            "AOV": "={{ $('Reconcile the Numbers').item.json.aov }}",
+            "Ad spend": "={{ $('Reconcile the Numbers').item.json.ad_spend }}",
+            "Blended ROAS": "={{ $('Reconcile the Numbers').item.json.blended_roas }}",
+            "Sent": "={{ $('Reconcile the Numbers').item.json.unexplained_pct <= 1.0 ? 'Yes' : 'Held' }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "c4000000-0000-4000-8000-000000000018",
+      "name": "Log the Day",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        200,
+        140
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Every Morning at 7am": {
+      "main": [
+        [
+          {
+            "node": "Shopify Orders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Booked Revenue (QuickBooks)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Meta Ads Spend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Shopify Orders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Booked Revenue (QuickBooks)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Meta Ads Spend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shopify Orders": {
+      "main": [
+        [
+          {
+            "node": "Total Up Shopify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Total Up Shopify": {
+      "main": [
+        [
+          {
+            "node": "Match the Books to Shopify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booked Revenue (QuickBooks)": {
+      "main": [
+        [
+          {
+            "node": "Match the Books to Shopify",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Match the Books to Shopify": {
+      "main": [
+        [
+          {
+            "node": "Add the Ad Spend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meta Ads Spend": {
+      "main": [
+        [
+          {
+            "node": "Add the Ad Spend",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add the Ad Spend": {
+      "main": [
+        [
+          {
+            "node": "Reconcile the Numbers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reconcile the Numbers": {
+      "main": [
+        [
+          {
+            "node": "Do the Numbers Agree?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Do the Numbers Agree?": {
+      "main": [
+        [
+          {
+            "node": "Write the Briefing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hold It and Ask Finance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write the Briefing",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Briefing": {
+      "main": [
+        [
+          {
+            "node": "Email the CEO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email the CEO": {
+      "main": [
+        [
+          {
+            "node": "Log the Day",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hold It and Ask Finance": {
+      "main": [
+        [
+          {
+            "node": "Log the Day",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Shopify Orders": [
+      {
+        "json": {
+          "order_number": "CG-4471",
+          "date": "2026-09-01",
+          "total_price": 4200.0,
+          "refund_amount": 0.0,
+          "tax": 430.0,
+          "shipping": 95.0,
+          "gift_card": 0.0,
+          "channel": "Online Store"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4472",
+          "date": "2026-09-01",
+          "total_price": 3180.0,
+          "refund_amount": 640.0,
+          "tax": 325.0,
+          "shipping": 85.0,
+          "gift_card": 0.0,
+          "channel": "Online Store"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4473",
+          "date": "2026-09-01",
+          "total_price": 5240.0,
+          "refund_amount": 0.0,
+          "tax": 545.0,
+          "shipping": 120.0,
+          "gift_card": 250.0,
+          "channel": "Online Store"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4474",
+          "date": "2026-09-01",
+          "total_price": 2650.0,
+          "refund_amount": 0.0,
+          "tax": 275.0,
+          "shipping": 75.0,
+          "gift_card": 0.0,
+          "channel": "Amazon"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4475",
+          "date": "2026-09-01",
+          "total_price": 3150.0,
+          "refund_amount": 0.0,
+          "tax": 335.0,
+          "shipping": 90.0,
+          "gift_card": 0.0,
+          "channel": "Online Store"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4462",
+          "date": "2026-08-31",
+          "total_price": 5100.0,
+          "refund_amount": 0.0,
+          "tax": 525.0,
+          "shipping": 110.0,
+          "gift_card": 0.0,
+          "channel": "Online Store"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4463",
+          "date": "2026-08-31",
+          "total_price": 4300.0,
+          "refund_amount": 0.0,
+          "tax": 445.0,
+          "shipping": 100.0,
+          "gift_card": 0.0,
+          "channel": "Faire"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4464",
+          "date": "2026-08-31",
+          "total_price": 3800.0,
+          "refund_amount": 0.0,
+          "tax": 395.0,
+          "shipping": 95.0,
+          "gift_card": 0.0,
+          "channel": "Online Store"
+        }
+      },
+      {
+        "json": {
+          "order_number": "CG-4465",
+          "date": "2026-08-31",
+          "total_price": 3700.0,
+          "refund_amount": 0.0,
+          "tax": 385.0,
+          "shipping": 105.0,
+          "gift_card": 0.0,
+          "channel": "Faire"
+        }
+      }
+    ],
+    "Booked Revenue (QuickBooks)": [
+      {
+        "json": {
+          "date": "2026-09-01",
+          "booked_net_revenue": 15155.0,
+          "source": "QuickBooks - Profit and Loss, net sales"
+        }
+      },
+      {
+        "json": {
+          "date": "2026-08-31",
+          "booked_net_revenue": 13180.0,
+          "source": "QuickBooks - Profit and Loss, net sales"
+        }
+      }
+    ],
+    "Meta Ads Spend": [
+      {
+        "json": {
+          "date": "2026-09-01",
+          "spend": 2480.0,
+          "attributed_revenue": 9340.0,
+          "account": "act_YOUR_AD_ACCOUNT_ID"
+        }
+      },
+      {
+        "json": {
+          "date": "2026-08-31",
+          "spend": 2610.0,
+          "attributed_revenue": 8900.0,
+          "account": "act_YOUR_AD_ACCOUNT_ID"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}

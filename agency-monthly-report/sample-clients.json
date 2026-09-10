@@ -1,0 +1,82 @@
+{
+  "agency": {
+    "name": "Amire",
+    "city": "Sydney",
+    "report_month": "2026-08",
+    "month_label": "August 2026",
+    "account_manager": "Priya Raman",
+    "manager_email": "priya@amire.example",
+    "review_channel": "reporting-review"
+  },
+  "_note": "Two clients, and they are here to show the two outcomes. Northbridge Dental has a complete month and gets a full written report. Halloran Legal's LinkedIn Ads row came back with every figure at zero after spending $3,240 last month - that is a broken connector, not a bad month, so nothing is written and nothing is published to the client.",
+  "roster": [
+    {
+      "client": "northbridge-dental",
+      "client_name": "Northbridge Dental",
+      "goal": "new patient bookings",
+      "conversion_name": "booking",
+      "reader": "practice owner",
+      "currency": "AUD",
+      "channels_run": "SEO, Google Ads, Facebook Ads",
+      "channels_not_run": "LinkedIn Ads",
+      "account_manager": "Priya Raman",
+      "manager_email": "priya@amire.example"
+    },
+    {
+      "client": "halloran-legal",
+      "client_name": "Halloran Legal",
+      "goal": "qualified enquiries",
+      "conversion_name": "enquiry",
+      "reader": "managing partner",
+      "currency": "AUD",
+      "channels_run": "SEO, Google Ads, LinkedIn Ads",
+      "channels_not_run": "Facebook Ads",
+      "account_manager": "Priya Raman",
+      "manager_email": "priya@amire.example"
+    }
+  ],
+  "ad_channels": [
+    {
+      "client": "northbridge-dental", "channel": "Google Ads", "month": "2026-08",
+      "spend": 4820.00, "impressions": 218400, "clicks": 6310, "conversions": 184,
+      "spend_prev": 4750.00, "impressions_prev": 205100, "clicks_prev": 5980, "conversions_prev": 161,
+      "conversions_last_year": 142, "target_conversions": 170
+    },
+    {
+      "client": "northbridge-dental", "channel": "Facebook Ads", "month": "2026-08",
+      "spend": 2140.00, "impressions": 412000, "clicks": 3890, "conversions": 47,
+      "spend_prev": 2180.00, "impressions_prev": 398000, "clicks_prev": 4210, "conversions_prev": 68,
+      "conversions_last_year": 55, "target_conversions": 60
+    },
+    {
+      "client": "halloran-legal", "channel": "Google Ads", "month": "2026-08",
+      "spend": 3960.00, "impressions": 74300, "clicks": 2110, "conversions": 31,
+      "spend_prev": 3880.00, "impressions_prev": 71900, "clicks_prev": 2040, "conversions_prev": 29,
+      "conversions_last_year": 24, "target_conversions": 30
+    },
+    {
+      "client": "halloran-legal", "channel": "LinkedIn Ads", "month": "2026-08",
+      "spend": 0, "impressions": 0, "clicks": 0, "conversions": 0,
+      "spend_prev": 3240.00, "impressions_prev": 128000, "clicks_prev": 940, "conversions_prev": 22,
+      "conversions_last_year": 18, "target_conversions": 20
+    }
+  ],
+  "seo": [
+    {
+      "client": "northbridge-dental", "channel": "SEO", "month": "2026-08",
+      "spend": 0, "impressions": 96400, "clicks": 4180, "conversions": 61,
+      "spend_prev": 0, "impressions_prev": 88200, "clicks_prev": 3760, "conversions_prev": 52,
+      "conversions_last_year": 38, "target_conversions": 55
+    },
+    {
+      "client": "halloran-legal", "channel": "SEO", "month": "2026-08",
+      "spend": 0, "impressions": 41200, "clicks": 1630, "conversions": 24,
+      "spend_prev": 0, "impressions_prev": 39800, "clicks_prev": 1580, "conversions_prev": 21,
+      "conversions_last_year": 16, "target_conversions": 22
+    }
+  ],
+  "expected": {
+    "northbridge-dental": "report - Facebook Ads is the story: spend flat, bookings down 30.9%, cost per booking up from $32.06 to $45.53",
+    "halloran-legal": "held - LinkedIn Ads spent $3,240 last month and reports $0 with 0 impressions"
+  }
+}

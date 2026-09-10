@@ -1,0 +1,558 @@
+{
+  "name": "Ask Our Documents",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## What this does\n\nSomebody on the team asks a question. The assistant looks the answer up in the\nstudio's **own** documents, answers, and **names the file it came from**.\n\nWhen the handbook does not cover it, it says so and points at a person. It does\nnot fall back on what it happens to know.\n\nFour questions in: two answered and sourced, one honest \"I don't know\", and one\nwhere the model answered from general knowledge and **got stopped**.",
+        "height": 300,
+        "width": 460,
+        "color": 4
+      },
+      "id": "e9000000-0000-4000-8000-000000000001",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1720,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Nothing here is \"trained on your business\"\n\nClients ask for an AI trained on their company. What actually works is\n**looking it up** - the assistant reads the current documents every time it is\nasked, and cites them.\n\nThat sounds like less. It is much more:\n\n- A wrong answer is fixed by **editing a document**, not retraining anything\n- It reads today's prices, not the prices as of the day it was built\n- It can tell you where an answer came from\n\nStyle is the one thing worth teaching by example. **Facts by lookup, voice by\nexample.** Neither of them is training.",
+        "height": 340,
+        "width": 480,
+        "color": 3
+      },
+      "id": "e9000000-0000-4000-8000-000000000002",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1220,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The agent chooses. The wiring decides.\n\n`Ask the Assistant` is an **AI Agent** - it is handed three tools and picks\nwhich to use. Question 2 needs two of them, and nobody wired that route.\n\nThat is the point of an agent, and also the risk: the path is not predictable,\nso it cannot be the thing that keeps you safe.\n\nSo every answer has to end with a **SOURCE** line, and `Did It Cite a Source?`\nchecks it. **An answer with no source is treated as a refusal**, even when it\nis a good answer - see question 4. The prompt makes a request; the Switch is\nwhat enforces it.",
+        "height": 340,
+        "width": 490,
+        "color": 6
+      },
+      "id": "e9000000-0000-4000-8000-000000000003",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        -460
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e9000000-0000-4000-8000-000000000004",
+      "name": "Run the Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1700,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Questions",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e9000000-0000-4000-8000-000000000005",
+      "name": "Questions from the Team",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1480,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.question }}",
+        "options": {
+          "systemMessage": "You are the in-house assistant for Larkspur Studio, an eleven-person branding studio. You answer questions from staff.\n\nAnswer ONLY from the tools you have been given. You have the staff handbook, the client\nrecords, and the studio calendar. If the answer is not in them, you do not know it.\n\nEvery reply ends with a line in exactly this form:\nSOURCE: <the handbook section, or the record, that the answer came from>\nor, when you could not find it:\nSOURCE: none\n\nRules that matter more than being helpful:\n- Never answer from your own general knowledge. Employment law, common practice and what other\n  companies usually do are all off limits, however confident you are. This studio's rules are\n  whatever its handbook says, and nothing else.\n- If the handbook does not cover it, say so plainly, say who to ask, and stop. That is a good\n  answer, not a failure.\n- Never guess a price, a date, a person's name or a policy. Never soften a rule to be helpful.\n- Use more than one tool when the question needs it. A question about a client's pricing usually\n  needs the policy and the client record.\n- Keep it short. Lead with the answer."
+        }
+      },
+      "id": "e9000000-0000-4000-8000-000000000006",
+      "name": "Ask the Assistant",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1240,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "e9000000-0000-4000-8000-000000000007",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1420,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.asked_by }}",
+        "contextWindowLength": 10
+      },
+      "id": "e9000000-0000-4000-8000-000000000008",
+      "name": "Remember the Conversation",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1280,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Handbook",
+          "mode": "name"
+        },
+        "options": {},
+        "descriptionType": "manual",
+        "toolDescription": "The staff handbook for Larkspur Studio. One row per policy, with a topic, the policy text, and the handbook section it comes from. Use this for anything about how the studio works - leave, expenses, remote days, pricing and discounts, chasing late payment, onboarding. Quote the source column when you answer."
+      },
+      "id": "e9000000-0000-4000-8000-000000000009",
+      "name": "Search the Staff Handbook",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        -1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Clients",
+          "mode": "name"
+        },
+        "options": {},
+        "descriptionType": "manual",
+        "toolDescription": "The client records. One row per client, with the account lead, the commercial arrangement, the renewal date and notes. Use this whenever a question names a client or asks who looks after something."
+      },
+      "id": "e9000000-0000-4000-8000-000000000010",
+      "name": "Look Up a Client",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        -960,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_CALENDAR_ID_HERE",
+          "mode": "id"
+        },
+        "options": {},
+        "descriptionType": "manual",
+        "toolDescription": "The studio calendar. Use this for questions about when something is happening, who is in a meeting, or what is on a given day."
+      },
+      "id": "e9000000-0000-4000-8000-000000000011",
+      "name": "Check the Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "g1",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SOURCE: none",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "It said it does not know"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "g2",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SOURCE:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Answered, and named the source"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "No source given - not trusted"
+        }
+      },
+      "id": "e9000000-0000-4000-8000-000000000012",
+      "name": "Did It Cite a Source?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1000,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "studio-questions",
+          "mode": "name"
+        },
+        "text": "=*{{ $('Questions from the Team').item.json.asked_by }} asked:* {{ $('Questions from the Team').item.json.question }}\n\n{{ $json.output }}",
+        "otherOptions": {}
+      },
+      "id": "e9000000-0000-4000-8000-000000000013",
+      "name": "Post the Answer to the Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -740,
+        0
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "ask-a-human",
+          "mode": "name"
+        },
+        "text": "=*The handbook could not answer this one.*\n{{ $('Questions from the Team').item.json.asked_by }} asked: {{ $('Questions from the Team').item.json.question }}\n_Whoever answers: this is worth adding to the handbook._",
+        "otherOptions": {}
+      },
+      "id": "e9000000-0000-4000-8000-000000000014",
+      "name": "Ask a Person Instead",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -740,
+        240
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Questions Asked",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Asked By": "={{ $('Questions from the Team').item.json.asked_by }}",
+            "Question": "={{ $('Questions from the Team').item.json.question }}",
+            "Answer": "={{ $('Did It Cite a Source?').item.json.output }}",
+            "Cited": "={{ $('Did It Cite a Source?').item.json.output.includes('SOURCE:') && !$('Did It Cite a Source?').item.json.output.includes('SOURCE: none') ? 'yes' : 'no' }}",
+            "Handbook Gap": "={{ $('Did It Cite a Source?').item.json.output.includes('SOURCE:') && !$('Did It Cite a Source?').item.json.output.includes('SOURCE: none') ? '' : 'yes - the documents do not cover this' }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e9000000-0000-4000-8000-000000000015",
+      "name": "Log Every Question",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -480,
+        120
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run the Demo": {
+      "main": [
+        [
+          {
+            "node": "Questions from the Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Questions from the Team": {
+      "main": [
+        [
+          {
+            "node": "Ask the Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask the Assistant": {
+      "main": [
+        [
+          {
+            "node": "Did It Cite a Source?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Did It Cite a Source?": {
+      "main": [
+        [
+          {
+            "node": "Ask a Person Instead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post the Answer to the Team",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask a Person Instead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post the Answer to the Team": {
+      "main": [
+        [
+          {
+            "node": "Log Every Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask a Person Instead": {
+      "main": [
+        [
+          {
+            "node": "Log Every Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ask the Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember the Conversation": {
+      "ai_memory": [
+        [
+          {
+            "node": "Ask the Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search the Staff Handbook": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask the Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up a Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask the Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check the Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask the Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Questions from the Team": [
+      {
+        "json": {
+          "question_id": "Q-1",
+          "asked_by": "Priya Nandra",
+          "question": "How much holiday do I get, and how far ahead do I need to ask for it?",
+          "expected": "cited"
+        }
+      },
+      {
+        "json": {
+          "question_id": "Q-2",
+          "asked_by": "Tom Vasquez",
+          "question": "Kestrel Bikes are asking for 15% off their retainer on the renewal call. Can I agree to that, and what are they on at the moment?",
+          "expected": "cited"
+        }
+      },
+      {
+        "json": {
+          "question_id": "Q-3",
+          "asked_by": "Amara Osei",
+          "question": "What is our paternity leave policy?",
+          "expected": "does not know"
+        }
+      },
+      {
+        "json": {
+          "question_id": "Q-4",
+          "asked_by": "Priya Nandra",
+          "question": "What is the standard notice period in the UK?",
+          "expected": "no source"
+        }
+      }
+    ],
+    "Ask the Assistant": [
+      {
+        "json": {
+          "output": "25 days a year plus bank holidays, pro rata if you are part time. Put the request in at least two weeks ahead through the HR system and your account lead approves it. One thing to check before you book: no more than two people from the same account team can be off at the same time.\n\nSOURCE: Handbook 3.1 Leave"
+        }
+      },
+      {
+        "json": {
+          "output": "No, not on your own. Nobody below director level agrees a discount, a rate change or a free scope extension. The line to take on the call is that we will look at scope rather than price, and if they press, it goes to the account director the same day.\n\nKestrel Bikes are on a retainer at 1800 a month, renewing 2026-09-30, and you are the account lead.\n\nSOURCE: Handbook 7.4 Pricing and discounts, and the client record for Kestrel Bikes"
+        }
+      },
+      {
+        "json": {
+          "output": "I could not find anything about paternity leave in the handbook. The leave section covers holiday only. Ask a director or whoever looks after HR, and it would be worth adding once you have the answer.\n\nSOURCE: none"
+        }
+      },
+      {
+        "json": {
+          "output": "In the UK the statutory minimum notice from an employee is one week once you have been employed for a month or more, and employers give one week per year of service up to twelve. Most contracts set something longer, commonly a month for salaried staff."
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "automatoys-ai-demo"
+  },
+  "tags": []
+}
